@@ -40,16 +40,26 @@ export default function Shop({ onCartClick }: ShopProps) {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const categoriesRef = ref(db, 'categories');
-        const categoriesSnapshot = await get(categoriesRef);
-
-        const categoriesData: Category[] = [];
-        if (categoriesSnapshot.exists()) {
-          const data = categoriesSnapshot.val();
-          Object.keys(data).forEach(key => {
-            categoriesData.push({ id: key, ...data[key] });
-          });
+        // Try to load from R2 first
+        const publishedData = await getPublishedData();
+        
+        let categoriesData: Category[] = [];
+        
+        if (publishedData && publishedData.categories) {
+          categoriesData = objectToArray<Category>(publishedData.categories);
           categoriesData.sort((a, b) => a.name.localeCompare(b.name));
+        } else {
+          // Fallback to Firebase
+          const categoriesRef = ref(db, 'categories');
+          const categoriesSnapshot = await get(categoriesRef);
+
+          if (categoriesSnapshot.exists()) {
+            const data = categoriesSnapshot.val();
+            Object.keys(data).forEach(key => {
+              categoriesData.push({ id: key, ...data[key] });
+            });
+            categoriesData.sort((a, b) => a.name.localeCompare(b.name));
+          }
         }
 
         setCategories(categoriesData);
