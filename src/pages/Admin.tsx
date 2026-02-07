@@ -22,7 +22,6 @@ import ColorPicker from '../components/admin/ColorPicker';
 import StatisticsCharts from '../components/admin/StatisticsCharts';
 import AIAgentManager from '../components/admin/AIAgentManager';
 import TrafficAnalytics from '../components/admin/TrafficAnalytics';
-import MaintenanceManager from '../components/admin/MaintenanceManager';
 import UpgradeBanner from '../components/admin/UpgradeBanner';
 import R2GalleryManager from '../components/admin/R2GalleryManager';
 import BillCustomizer from '../components/admin/BillCustomizer';
