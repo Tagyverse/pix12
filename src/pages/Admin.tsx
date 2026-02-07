@@ -870,6 +870,78 @@ export default function Admin() {
     return matchesSearch && matchesStatus;
   });
 
+  const handlePublish = async () => {
+    if (!confirm('Are you sure you want to publish all data to the live site? Users will see this data.')) {
+      return;
+    }
+
+    setIsPublishing(true);
+    try {
+      // Fetch all Firebase data
+      const dataRefs = {
+        products: ref(db, 'products'),
+        categories: ref(db, 'categories'),
+        reviews: ref(db, 'reviews'),
+        offers: ref(db, 'offers'),
+        site_settings: ref(db, 'site_settings'),
+        carousel_images: ref(db, 'carousel_images'),
+        carousel_settings: ref(db, 'carousel_settings'),
+        homepage_sections: ref(db, 'homepage_sections'),
+        info_sections: ref(db, 'info_sections'),
+        marquee_sections: ref(db, 'marquee_sections'),
+        video_sections: ref(db, 'video_sections'),
+        video_section_settings: ref(db, 'video_section_settings'),
+        video_overlay_sections: ref(db, 'video_overlay_sections'),
+        video_overlay_items: ref(db, 'video_overlay_items'),
+        default_sections_visibility: ref(db, 'default_sections_visibility'),
+        card_designs: ref(db, 'card_designs'),
+        navigation_settings: ref(db, 'navigation_settings'),
+        coupons: ref(db, 'coupons'),
+        try_on_models: ref(db, 'try_on_models'),
+        tax_settings: ref(db, 'tax_settings'),
+        footer_settings: ref(db, 'footer_settings'),
+        policies: ref(db, 'policies'),
+        maintenance_settings: ref(db, 'maintenance_settings'),
+        settings: ref(db, 'settings'),
+      };
+
+      const snapshots = await Promise.all(
+        Object.entries(dataRefs).map(async ([key, refPath]) => {
+          const snapshot = await get(refPath);
+          return [key, snapshot.exists() ? snapshot.val() : null];
+        })
+      );
+
+      const allData: Record<string, any> = {};
+      snapshots.forEach(([key, value]) => {
+        allData[key as string] = value;
+      });
+
+      // Upload to R2
+      const response = await fetch('/api/publish-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: allData }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to publish');
+      }
+
+      setLastPublished(result.published_at);
+      alert('Data published successfully! Users will now see the updated content.');
+    } catch (error) {
+      console.error('Error publishing data:', error);
+      alert('Failed to publish data. Please try again.');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   if (!isAdminAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 to-mint-50 flex items-center justify-center p-4">
