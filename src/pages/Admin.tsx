@@ -26,6 +26,7 @@ import MaintenanceManager from '../components/admin/MaintenanceManager';
 import UpgradeBanner from '../components/admin/UpgradeBanner';
 import R2GalleryManager from '../components/admin/R2GalleryManager';
 import BillCustomizer from '../components/admin/BillCustomizer';
+import PreviewModal from '../components/admin/PreviewModal';
 import ImageUpload from '../components/ImageUpload';
 import MultipleImageUpload from '../components/MultipleImageUpload';
 import LazyImage from '../components/LazyImage';
