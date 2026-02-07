@@ -2691,7 +2691,7 @@ export default function Admin() {
                                 contact_email: settingsFormData.contact_email || 'contact@hairstore.com',
                                 contact_phone: settingsFormData.contact_phone || '+919345259073'
                               };
-                              downloadBillAsPDF(order, siteSettings, shippingPrice);
+                              downloadBillAsPDF(order, siteSettings, shippingPrice, billSettings);
                             }}
                             className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg border-2 border-red-700"
                           >
@@ -2705,7 +2705,7 @@ export default function Admin() {
                                 contact_email: settingsFormData.contact_email || 'contact@hairstore.com',
                                 contact_phone: settingsFormData.contact_phone || '+919345259073'
                               };
-                              downloadBillAsJPG(order, siteSettings, shippingPrice);
+                              downloadBillAsJPG(order, siteSettings, shippingPrice, billSettings);
                             }}
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg border-2 border-blue-700"
                           >
@@ -2719,7 +2719,7 @@ export default function Admin() {
                                 contact_email: settingsFormData.contact_email || 'contact@hairstore.com',
                                 contact_phone: settingsFormData.contact_phone || '+919345259073'
                               };
-                              printBill(order, siteSettings, shippingPrice);
+                              printBill(order, siteSettings, shippingPrice, billSettings);
                             }}
                             className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg border-2 border-gray-800"
                           >
