@@ -1,4 +1,5 @@
 // Performance optimization utilities
+import React from 'react';
 
 /**
  * Debounce function to limit the rate at which a function is called
