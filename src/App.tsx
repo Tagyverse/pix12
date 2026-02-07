@@ -218,32 +218,77 @@ function AppContent() {
   }, []);
 
   const renderPage = () => {
+    const LoadingFallback = () => (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-mint-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+
     switch (currentPage) {
       case 'home':
         return <Home onNavigate={handleNavigate} onCartClick={() => setCartModalOpen(true)} />;
       case 'shop':
         return <Shop onCartClick={() => setCartModalOpen(true)} />;
       case 'admin':
-        return <Admin />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <Admin />
+          </Suspense>
+        );
       case 'superadmin':
-        return <SuperAdmin />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <SuperAdmin />
+          </Suspense>
+        );
       case 'checkout':
-        return <Checkout onBack={() => handleNavigate('shop')} onLoginClick={() => setLoginModalOpen(true)} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <Checkout onBack={() => handleNavigate('shop')} onLoginClick={() => setLoginModalOpen(true)} />
+          </Suspense>
+        );
       case 'privacy-policy':
-        return <PrivacyPolicy onBack={() => handleNavigate('home')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <PrivacyPolicy onBack={() => handleNavigate('home')} />
+          </Suspense>
+        );
       case 'shipping-policy':
-        return <ShippingPolicy onBack={() => handleNavigate('home')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <ShippingPolicy onBack={() => handleNavigate('home')} />
+          </Suspense>
+        );
       case 'refund-policy':
-        return <RefundPolicy onBack={() => handleNavigate('home')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <RefundPolicy onBack={() => handleNavigate('home')} />
+          </Suspense>
+        );
       case 'contact':
-        return <Contact onBack={() => handleNavigate('home')} />;
+        return (
+          <Suspense fallback={<LoadingFallback />}>
+            <Contact onBack={() => handleNavigate('home')} />
+          </Suspense>
+        );
       default:
         return <Home onNavigate={handleNavigate} onCartClick={() => setCartModalOpen(true)} />;
     }
   };
 
   if (maintenanceMode && appReady) {
-    return <Maintenance isAdminRoute={currentPage === 'admin'} />;
+    return (
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }>
+        <Maintenance isAdminRoute={currentPage === 'admin'} />
+      </Suspense>
+    );
   }
 
   return (
