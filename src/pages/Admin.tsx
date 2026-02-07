@@ -3120,6 +3120,9 @@ export default function Admin() {
           )}
         </div>
       </div>
+      
+      {/* Preview Modal */}
+      <PreviewModal isOpen={showPreviewModal} onClose={() => setShowPreviewModal(false)} />
     </div>
   );
 }
