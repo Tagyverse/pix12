@@ -97,7 +97,6 @@ function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
   const [appReady, setAppReady] = useState(false);
   const [temporarilyClosed, setTemporarilyClosed] = useState(false);
-  const [maintenanceMode, setMaintenanceMode] = useState(true);
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
 
   const hideNavigation = currentPage === 'admin' || currentPage === 'checkout' || currentPage === 'superadmin' || currentPage === 'privacy-policy' || currentPage === 'shipping-policy' || currentPage === 'refund-policy' || currentPage === 'contact';
