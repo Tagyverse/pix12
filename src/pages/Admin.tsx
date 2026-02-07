@@ -3091,12 +3091,6 @@ export default function Admin() {
               </div>
             </div>
           )}
-
-          {activeTab === 'maintenance' && (
-            <div className="space-y-6">
-              <MaintenanceManager />
-            </div>
-          )}
         </div>
       </div>
       
