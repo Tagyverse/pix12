@@ -1,0 +1,1275 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "admin_settings": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === 'gokul.offl.08@gmail.com'",
+      "full_locked": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "feature_locks": {
+        ".validate": "!newData.exists() || newData.hasChildren()"
+      }
+    },
+
+    "products": {
+      ".read": true,
+      ".indexOn": ["category_id", "featured", "best_selling", "might_you_like", "createdAt", "in_stock"],
+      "$productId": {
+        ".write": "auth != null",
+        ".validate": "(!data.exists() && newData.hasChildren(['name', 'description', 'price', 'image_url', 'in_stock', 'createdAt']) && (newData.hasChild('category_id') || newData.hasChild('category_ids'))) || (data.exists() && newData.hasChild('name') && newData.hasChild('description') && newData.hasChild('price') && newData.hasChild('image_url') && newData.hasChild('in_stock') && newData.hasChild('createdAt') && (newData.hasChild('category_id') || newData.hasChild('category_ids')))",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+        },
+        "slug": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "description": {
+          ".validate": "newData.isString() && newData.val().length <= 1000"
+        },
+        "price": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "compare_at_price": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0) || newData.val() === null"
+        },
+        "image_url": {
+          ".validate": "newData.isString() && newData.val().matches(/^https?:\\/\\/.+/)"
+        },
+        "gallery_images": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "video_url": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "category_id": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0)"
+        },
+        "category_ids": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "in_stock": {
+          ".validate": "newData.isBoolean()"
+        },
+        "featured": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "best_selling": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "might_you_like": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "sizes": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "colors": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "default_size": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "default_color": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "size_pricing": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "try_on_enabled": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "try_on_image_url": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "hairclip_type": {
+          ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'side' || newData.val() === 'top' || newData.val() === 'back' || newData.val() === 'headband' || newData.val() === 'full'))"
+        },
+        "availableColors": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "createdAt": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "categories": {
+      ".read": true,
+      ".indexOn": ["name"],
+      "$categoryId": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['name', 'description', 'image_url'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+        },
+        "description": {
+          ".validate": "newData.isString() && newData.val().length <= 500"
+        },
+        "image_url": {
+          ".validate": "newData.isString() && newData.val().matches(/^https?:\\/\\/.+/)"
+        },
+        "featured": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "new_arrival": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "bg_color": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "carousel_images": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+
+    "carousel_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "is_visible": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "autoplay": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "interval": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 1000)"
+      },
+      "show_indicators": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "show_navigation": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      }
+    },
+
+    "video_sections": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["order", "isVisible"],
+      "$videoId": {
+        ".validate": "newData.hasChildren(['url', 'order', 'isVisible'])",
+        "url": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "title": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "description": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "order": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "isVisible": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "video_section_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "is_visible": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "section_title": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0 && newData.val().length <= 200)"
+      },
+      "section_subtitle": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+      }
+    },
+
+    "orders": {
+      ".read": "auth != null",
+      "$orderId": {
+        ".read": "auth != null",
+        ".write": "!data.exists() || auth != null",
+        ".validate": "newData.hasChildren(['userId', 'items', 'totalAmount', 'status', 'createdAt']) || newData.hasChildren(['customer_name', 'customer_email', 'customer_phone', 'shipping_address', 'total_amount', 'payment_status', 'order_status', 'created_at', 'order_items']) || newData.hasChildren(['user_id', 'customer_name', 'customer_email', 'customer_phone', 'shipping_address', 'total_amount', 'payment_status', 'order_status', 'created_at', 'order_items'])",
+        "userId": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "user_id": {
+          ".validate": "!newData.exists() || newData.isString() || newData.val() === null"
+        },
+        "items": {
+          ".validate": "newData.hasChildren()",
+          "$item": {
+            ".validate": "newData.hasChildren(['productId', 'quantity', 'price'])"
+          }
+        },
+        "totalAmount": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "total_amount": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "status": {
+          ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'pending' || newData.val() === 'processing' || newData.val() === 'completed' || newData.val() === 'cancelled'))"
+        },
+        "payment_status": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "order_status": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "customer_name": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "customer_email": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "customer_phone": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "shipping_address": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "order_items": {
+          ".validate": "!newData.exists() || newData.hasChildren()"
+        },
+        "created_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "razorpay_order_id": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "razorpay_payment_id": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "razorpay_signature": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "verification_error": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "paymentId": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "shippingAddress": {
+          ".validate": "!newData.exists() || newData.hasChildren(['name', 'phone', 'address', 'city', 'state', 'pincode'])"
+        },
+        "createdAt": {
+          ".validate": "newData.isString()"
+        },
+        "updatedAt": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "dispatch_details": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "subtotal": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "shipping_charge": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "tax_amount": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "tax_percentage": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "tax_label": {
+          ".validate": "!newData.exists() || newData.isString() || newData.val() === null"
+        },
+        "gst_number": {
+          ".validate": "!newData.exists() || newData.isString() || newData.val() === null"
+        },
+        "discount": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "coupon_code": {
+          ".validate": "!newData.exists() || newData.isString() || newData.val() === null"
+        },
+        "coupon_discount_type": {
+          ".validate": "!newData.exists() || newData.isString() || newData.val() === null"
+        },
+        "coupon_discount_value": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0) || newData.val() === null"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "users": {
+      ".read": "auth != null",
+      "$userId": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['createdAt']) || newData.hasChildren(['email', 'createdAt']) || newData.hasChildren(['created_at'])",
+        "email": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "displayName": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)"
+        },
+        "phone": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^[0-9+\\-\\s()]{10,15}$/))"
+        },
+        "createdAt": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "created_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "welcome_coupon_shown": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "welcome_coupon_code": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "welcome_coupon_shown_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "admins": {
+      ".read": "auth != null",
+      "$adminId": {
+        ".write": "auth != null",
+        ".validate": "newData.isBoolean()"
+      }
+    },
+
+    "super_admins": {
+      ".read": "auth != null",
+      "$superAdminId": {
+        ".write": "auth != null",
+        ".validate": "newData.isBoolean()"
+      }
+    },
+
+    "policies": {
+      ".read": true,
+      "$policyKey": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['title', 'content', 'isEnabled'])",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+        },
+        "content": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "isEnabled": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "reviews": {
+      ".read": true,
+      ".indexOn": ["productId", "isApproved", "createdAt"],
+      "$reviewId": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['userId', 'productId', 'rating', 'comment', 'createdAt']) || newData.hasChildren(['customer_name', 'review_text', 'is_active', 'created_at'])",
+        "userId": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "productId": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "rating": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5"
+        },
+        "comment": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000"
+        },
+        "isApproved": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "createdAt": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "site_settings": {
+      ".read": true,
+      "$settingKey": {
+        ".write": "auth != null",
+        "site_name": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+        },
+        "site_tagline": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
+        },
+        "contact_email": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "contact_phone": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "instagram_url": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "facebook_url": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "twitter_url": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "whatsapp_number": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "welcome_banner_text": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "top_banner_text": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "top_banner_active": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "footer_text": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "popup_enabled": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "temporarily_closed": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "updated_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        }
+      }
+    },
+
+    "favorites": {
+      ".read": false,
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && auth.uid === $userId",
+        "$productId": {
+          ".validate": "newData.isBoolean()"
+        }
+      }
+    },
+
+    "cart": {
+      ".read": false,
+      "$userId": {
+        ".read": "auth != null && auth.uid === $userId",
+        ".write": "auth != null && auth.uid === $userId",
+        "$productId": {
+          ".validate": "newData.hasChildren(['quantity', 'addedAt'])",
+          "quantity": {
+            ".validate": "newData.isNumber() && newData.val() > 0"
+          },
+          "addedAt": {
+            ".validate": "newData.isString()"
+          }
+        }
+      }
+    },
+
+    "site_content": {
+      ".read": true,
+      "$contentKey": {
+        ".write": "auth != null"
+      }
+    },
+
+    "social_links": {
+      ".read": true,
+      ".write": "auth != null",
+      "$linkId": {
+        ".validate": "newData.hasChildren(['platform', 'url', 'icon', 'order'])",
+        "platform": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "url": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "icon": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "order": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "settings": {
+      ".read": true,
+      "$settingId": {
+        ".write": "auth != null"
+      },
+      "shipping_price": {
+        ".read": true,
+        ".write": "auth != null",
+        ".validate": "newData.isNumber() && newData.val() >= 0"
+      }
+    },
+
+    "offers": {
+      ".read": true,
+      "$offerId": {
+        ".write": "auth != null"
+      }
+    },
+
+    "marquee": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+
+    "coupons": {
+      ".read": true,
+      ".indexOn": ["code", "is_active", "valid_from", "valid_until"],
+      "$couponId": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['code', 'discount_type', 'discount_value', 'is_active', 'created_at'])",
+        "code": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+        },
+        "description": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "discount_type": {
+          ".validate": "newData.isString() && (newData.val() === 'percentage' || newData.val() === 'fixed')"
+        },
+        "discount_value": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "min_purchase": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "max_discount": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "usage_limit": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() > 0)"
+        },
+        "usage_count": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        },
+        "valid_from": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "valid_until": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "is_active": {
+          ".validate": "newData.isBoolean()"
+        },
+        "created_at": {
+          ".validate": "newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "homepage_sections": {
+      ".read": true,
+      ".indexOn": ["order_index", "is_visible"],
+      "$sectionId": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['title', 'content_type', 'display_type', 'selected_items', 'is_visible', 'order_index', 'created_at', 'updated_at'])",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+        },
+        "subtitle": {
+          ".validate": "!newData.exists() || newData.isString() || newData.val() === null"
+        },
+        "content_type": {
+          ".validate": "newData.isString() && (newData.val() === 'product' || newData.val() === 'category')"
+        },
+        "display_type": {
+          ".validate": "newData.isString() && (newData.val() === 'horizontal' || newData.val() === 'vertical' || newData.val() === 'carousel' || newData.val() === 'swipable' || newData.val() === 'grid')"
+        },
+        "selected_items": {
+          ".validate": "newData.hasChildren()"
+        },
+        "is_visible": {
+          ".validate": "newData.isBoolean()"
+        },
+        "order_index": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "created_at": {
+          ".validate": "newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "default_sections_visibility": {
+      ".read": true,
+      ".write": "auth != null",
+      "banner_social": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "feature_boxes": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "all_categories": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "best_sellers": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "might_you_like": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "shop_by_category": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "customer_reviews": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "marquee": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "smart_feature_fab": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "order_banner_social": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+      },
+      "order_feature_boxes": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+      },
+      "order_all_categories": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+      },
+      "order_best_sellers": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+      },
+      "order_might_you_like": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+      },
+      "order_shop_by_category": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+      },
+      "order_customer_reviews": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+      },
+      "order_marquee": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+      }
+    },
+
+    "info_sections": {
+      ".read": true,
+      ".indexOn": ["order_index", "is_visible"],
+      "$sectionId": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['title', 'content', 'theme', 'is_visible', 'order_index', 'created_at', 'updated_at'])",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+        },
+        "content": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 2000"
+        },
+        "theme": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "is_visible": {
+          ".validate": "newData.isBoolean()"
+        },
+        "order_index": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "created_at": {
+          ".validate": "newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "card_designs": {
+      ".read": true,
+      "$sectionKey": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['section_name', 'theme', 'updated_at'])",
+        "section_name": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "theme": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "border_radius": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "border_width": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "border_color": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "shadow": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "bg_color": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "hover_transform": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "image_border_radius": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "button_style": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "navigation": {
+      ".read": true,
+      "tabs": {
+        ".write": "auth != null",
+        "$tabId": {
+          ".validate": "newData.hasChildren(['label', 'path', 'order', 'isVisible', 'color'])",
+          "label": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "path": {
+            ".validate": "newData.isString() && newData.val().length > 0"
+          },
+          "order": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "isVisible": {
+            ".validate": "newData.isBoolean()"
+          },
+          "color": {
+            ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "style": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['background', 'text', 'activeTab', 'inactiveButton', 'borderRadius', 'buttonSize', 'themeMode', 'buttonLabels'])",
+        "background": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "text": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "activeTab": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "inactiveButton": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "borderRadius": {
+          ".validate": "newData.isString() && (newData.val() === 'none' || newData.val() === 'sm' || newData.val() === 'md' || newData.val() === 'lg' || newData.val() === 'xl' || newData.val() === '2xl' || newData.val() === 'full')"
+        },
+        "buttonSize": {
+          ".validate": "newData.isString() && (newData.val() === 'sm' || newData.val() === 'md' || newData.val() === 'lg' || newData.val() === 'xl')"
+        },
+        "themeMode": {
+          ".validate": "newData.isString() && (newData.val() === 'default' || newData.val() === 'preset' || newData.val() === 'custom')"
+        },
+        "buttonLabels": {
+          ".validate": "newData.hasChildren(['home', 'shop', 'search', 'cart', 'myOrders', 'login', 'signOut', 'admin'])",
+          "home": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "shop": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "search": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "cart": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "myOrders": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "login": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "signOut": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "admin": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 50"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "try_on_models": {
+      ".read": true,
+      ".indexOn": ["name", "created_at"],
+      "$modelId": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['name', 'image_url'])",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+        },
+        "image_url": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "created_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "is_active": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        },
+        "order": {
+          ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0)"
+        }
+      }
+    },
+
+    "tax_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "is_enabled": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "tax_percentage": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 0 && newData.val() <= 100)"
+      },
+      "gst_number": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "tax_label": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "include_in_price": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "updated_at": {
+        ".validate": "!newData.exists() || newData.isString()"
+      }
+    },
+
+    "bill_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "logo_url": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "company_name": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+      },
+      "company_tagline": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
+      },
+      "company_address": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+      },
+      "company_email": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "company_phone": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "company_gst": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "layout_style": {
+        ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'modern' || newData.val() === 'classic' || newData.val() === 'minimal' || newData.val() === 'detailed'))"
+      },
+      "show_product_images": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "show_shipping_label": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "show_cut_line": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "primary_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "secondary_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "header_bg_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "table_header_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "font_family": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "header_font_size": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 8 && newData.val() <= 72)"
+      },
+      "body_font_size": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() >= 8 && newData.val() <= 24)"
+      },
+      "footer_text": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+      },
+      "thank_you_message": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+      },
+      "from_name": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+      },
+      "from_address": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 300)"
+      },
+      "from_city": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)"
+      },
+      "from_state": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)"
+      },
+      "from_pincode": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 20)"
+      },
+      "from_phone": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "updated_at": {
+        ".validate": "!newData.exists() || newData.isString()"
+      }
+    },
+
+    "marquee_sections": {
+      ".read": true,
+      ".indexOn": ["order_index", "is_visible"],
+      "$sectionId": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['text', 'speed', 'bg_color', 'text_color', 'is_visible', 'order_index', 'created_at', 'updated_at'])",
+        "text": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 500"
+        },
+        "speed": {
+          ".validate": "newData.isString() && (newData.val() === 'slow' || newData.val() === 'medium' || newData.val() === 'fast')"
+        },
+        "bg_color": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "text_color": {
+          ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+        },
+        "is_visible": {
+          ".validate": "newData.isBoolean()"
+        },
+        "order_index": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "created_at": {
+          ".validate": "newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "footer_config": {
+      ".read": true,
+      ".write": "auth != null",
+      "is_visible": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "theme": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "backgroundColor": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "textColor": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "headingColor": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "linkColor": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "linkHoverColor": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "accentColor": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "companyName": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+      },
+      "description": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+      },
+      "email": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "phone": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "address": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "social": {
+        ".validate": "!newData.exists() || newData.hasChildren()",
+        "facebook": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "instagram": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "twitter": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "linkedin": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "youtube": {
+          ".validate": "!newData.exists() || newData.isString()"
+        }
+      },
+      "quickLinks": {
+        ".validate": "!newData.exists() || newData.hasChildren()"
+      },
+      "copyrightText": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+      },
+      "showQuickLinks": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "showSocial": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "showContact": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      }
+    },
+
+    "video_overlay_items": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["order", "isVisible"],
+      "$videoId": {
+        ".validate": "newData.hasChildren(['video_url', 'overlay_text', 'order', 'isVisible'])",
+        "video_url": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        },
+        "overlay_text": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+        },
+        "overlay_subtext": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+        },
+        "order": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "isVisible": {
+          ".validate": "newData.isBoolean()"
+        },
+        "created_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "video_overlay_sections": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["order_index", "is_visible"],
+      "$sectionId": {
+        ".validate": "newData.hasChildren(['title', 'videos', 'is_visible', 'order_index'])",
+        "title": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+        },
+        "subtitle": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+        },
+        "videos": {
+          ".validate": "newData.hasChildren()"
+        },
+        "is_visible": {
+          ".validate": "newData.isBoolean()"
+        },
+        "order_index": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "created_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "updated_at": {
+          ".validate": "!newData.exists() || newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "maintenance_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "is_enabled": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "title": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length > 0 && newData.val().length <= 200)"
+      },
+      "message": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 1000)"
+      },
+      "estimated_time": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "contact_email": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "contact_phone": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "updated_at": {
+        ".validate": "!newData.exists() || newData.isString()"
+      }
+    },
+
+    "ai_agent_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "is_enabled": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "agent_name": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 100)"
+      },
+      "greeting_message": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+      },
+      "position": {
+        ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'bottom-right' || newData.val() === 'bottom-left'))"
+      },
+      "primary_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "updated_at": {
+        ".validate": "!newData.exists() || newData.isString()"
+      }
+    },
+
+    "welcome_coupons": {
+      ".read": true,
+      ".write": "auth != null",
+      "is_enabled": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "coupon_code": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 50)"
+      },
+      "discount_type": {
+        ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'percentage' || newData.val() === 'fixed'))"
+      },
+      "discount_value": {
+        ".validate": "!newData.exists() || (newData.isNumber() && newData.val() > 0)"
+      },
+      "title": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+      },
+      "description": {
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 500)"
+      },
+      "show_once_per_user": {
+        ".validate": "!newData.exists() || newData.isBoolean()"
+      },
+      "updated_at": {
+        ".validate": "!newData.exists() || newData.isString()"
+      }
+    },
+
+    "admin_feature_locks": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$featureId": {
+        ".validate": "newData.hasChildren(['id', 'name', 'description', 'locked'])",
+        "id": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 200"
+        },
+        "description": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 500"
+        },
+        "locked": {
+          ".validate": "newData.isBoolean()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
