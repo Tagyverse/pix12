@@ -370,11 +370,13 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <CartProvider>
-          <FavoritesProvider>
-            <AppContent />
-          </FavoritesProvider>
-        </CartProvider>
+        <PublishedDataProvider>
+          <CartProvider>
+            <FavoritesProvider>
+              <AppContent />
+            </FavoritesProvider>
+          </CartProvider>
+        </PublishedDataProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
