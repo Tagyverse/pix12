@@ -96,17 +96,6 @@ export default function Shop({ onCartClick }: ShopProps) {
         
         if (publishedData && publishedData.products) {
           productsData = objectToArray<Product>(publishedData.products);
-        } else {
-          // Fallback to Firebase
-          const productsRef = ref(db, 'products');
-          const productsSnapshot = await get(productsRef);
-
-          if (productsSnapshot.exists()) {
-            const data = productsSnapshot.val();
-            Object.keys(data).forEach(key => {
-              productsData.push({ id: key, ...data[key] });
-            });
-          }
         }
 
         if (selectedCategory) {
