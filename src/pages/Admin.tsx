@@ -1063,7 +1063,14 @@ export default function Admin() {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Admin Panel</h1>
               <p className="text-sm sm:text-base text-gray-600">Manage your products and categories</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => setShowPreviewModal(true)}
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg hover:shadow-xl"
+              >
+                <Eye className="w-5 h-5" />
+                Preview Changes
+              </button>
               <button
                 onClick={handlePublish}
                 disabled={isPublishing}
