@@ -111,10 +111,11 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Invoice - ${order.id}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=${s.font_family}:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -123,66 +124,102 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: '${s.font_family}', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       padding: 20px;
       background: #ffffff;
     }
 
     .invoice-container {
       max-width: 210mm;
-      width: 210mm;
-      min-height: 297mm;
+      width: 100%;
+      min-height: auto;
       margin: 0 auto;
       background: white;
       padding: 20px 30px;
-      border: 2px solid #000000;
+      border: 2px solid ${s.primary_color};
       box-sizing: border-box;
+    }
+
+    @media screen and (min-width: 768px) {
+      .invoice-container {
+        width: 210mm;
+        min-height: 297mm;
+      }
     }
 
     .header {
       display: flex;
-      justify-content: space-between;
-      align-items: start;
-      border-bottom: 2px solid #000000;
+      flex-direction: column;
+      gap: 15px;
+      border-bottom: 2px solid ${s.primary_color};
       padding-bottom: 15px;
       margin-bottom: 20px;
+      background: ${s.header_bg_color};
+    }
+
+    @media screen and (min-width: 768px) {
+      .header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: start;
+      }
     }
 
     .company-info {
-      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .company-logo {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
     }
 
     .company-name {
-      font-size: 24px;
+      font-size: ${s.header_font_size}px;
       font-weight: bold;
-      color: #000000;
+      color: ${s.primary_color};
+      margin-bottom: 5px;
+    }
+
+    .company-tagline {
+      font-size: ${s.body_font_size}px;
+      color: ${s.secondary_color};
       margin-bottom: 5px;
     }
 
     .company-details {
-      font-size: 11px;
-      color: #333333;
+      font-size: ${s.body_font_size - 1}px;
+      color: ${s.secondary_color};
       line-height: 1.5;
     }
 
     .invoice-title {
-      text-align: right;
+      text-align: left;
+    }
+
+    @media screen and (min-width: 768px) {
+      .invoice-title {
+        text-align: right;
+      }
     }
 
     .invoice-title h1 {
       font-size: 28px;
-      color: #000000;
+      color: ${s.primary_color};
       margin-bottom: 5px;
     }
 
     .invoice-number {
-      font-size: 12px;
-      color: #333333;
+      font-size: ${s.body_font_size}px;
+      color: ${s.secondary_color};
       margin-bottom: 5px;
     }
 
     .order-date {
-      font-size: 12px;
+      font-size: ${s.body_font_size}px;
       color: #666666;
       margin-top: 5px;
     }
@@ -199,17 +236,18 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
       width: 100%;
       border-collapse: collapse;
       margin-bottom: 20px;
+      font-size: ${s.body_font_size}px;
     }
 
     .items-table thead {
-      background: #000000;
+      background: ${s.table_header_color};
       color: white;
     }
 
     .items-table th {
       padding: 10px 8px;
       text-align: left;
-      font-size: 11px;
+      font-size: ${s.body_font_size - 1}px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -225,13 +263,13 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
     }
 
     .items-table tbody tr:last-child {
-      border-bottom: 2px solid #000000;
+      border-bottom: 2px solid ${s.primary_color};
     }
 
     .items-table td {
       padding: 10px 8px;
-      font-size: 12px;
-      color: #333333;
+      font-size: ${s.body_font_size}px;
+      color: ${s.secondary_color};
       vertical-align: middle;
     }
 
@@ -251,28 +289,29 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
 
     .totals {
       margin-left: auto;
-      width: 250px;
+      width: 100%;
+      max-width: 250px;
     }
 
     .total-row {
       display: flex;
       justify-content: space-between;
       padding: 8px 0;
-      font-size: 12px;
+      font-size: ${s.body_font_size}px;
     }
 
     .total-row.subtotal {
-      color: #333333;
+      color: ${s.secondary_color};
       border-bottom: 1px solid #cccccc;
     }
 
     .total-row.tax {
-      color: #333333;
+      color: ${s.secondary_color};
       border-bottom: 1px solid #cccccc;
     }
 
     .total-row.grand-total {
-      background: #000000;
+      background: ${s.primary_color};
       color: white;
       padding: 12px 15px;
       margin-top: 8px;
@@ -284,40 +323,40 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
     .payment-status {
       display: inline-block;
       padding: 4px 10px;
-      border: 2px solid #000000;
+      border: 2px solid ${s.primary_color};
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
       margin-top: 5px;
       background: white;
-      color: #000000;
+      color: ${s.primary_color};
     }
 
     .payment-status.completed {
       background: #e5e5e5;
-      color: #000000;
-      border-color: #000000;
+      color: ${s.primary_color};
+      border-color: ${s.primary_color};
     }
 
     .payment-status.pending {
       background: #f5f5f5;
-      color: #333333;
+      color: ${s.secondary_color};
       border-color: #666666;
     }
 
     .payment-status.failed {
       background: #cccccc;
-      color: #000000;
-      border-color: #000000;
+      color: ${s.primary_color};
+      border-color: ${s.primary_color};
     }
 
     .footer {
       margin-top: 20px;
       padding-top: 15px;
-      border-top: 2px solid #000000;
+      border-top: 2px solid ${s.primary_color};
       text-align: center;
       font-size: 10px;
-      color: #333333;
+      color: ${s.secondary_color};
     }
 
     .footer p {
@@ -328,7 +367,7 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
       margin-top: 20px;
       text-align: center;
       font-size: 14px;
-      color: #000000;
+      color: ${s.primary_color};
       font-weight: 600;
     }
 
@@ -348,45 +387,52 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
       background: white;
       padding: 0 12px;
       font-size: 10px;
-      color: #000000;
+      color: ${s.primary_color};
       font-weight: 700;
       letter-spacing: 1px;
     }
 
     .shipping-labels {
       display: flex;
+      flex-direction: column;
       gap: 20px;
       margin-top: 15px;
     }
 
+    @media screen and (min-width: 768px) {
+      .shipping-labels {
+        flex-direction: row;
+      }
+    }
+
     .label-box {
       flex: 1;
-      border: 2px solid #000000;
+      border: 2px solid ${s.primary_color};
       padding: 15px;
       background: #ffffff;
     }
 
     .label-box h3 {
       font-size: 12px;
-      color: #000000;
+      color: ${s.primary_color};
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 10px;
       font-weight: 700;
-      border-bottom: 2px solid #000000;
+      border-bottom: 2px solid ${s.primary_color};
       padding-bottom: 5px;
     }
 
     .label-box p {
       font-size: 11px;
-      color: #000000;
+      color: ${s.primary_color};
       line-height: 1.6;
       margin-bottom: 4px;
       font-weight: 600;
     }
 
     .label-box strong {
-      color: #000000;
+      color: ${s.primary_color};
       font-weight: 700;
     }
 
@@ -398,6 +444,20 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
 
       .invoice-container {
         box-shadow: none;
+        width: 210mm;
+        min-height: 297mm;
+      }
+
+      .header {
+        flex-direction: row;
+      }
+
+      .invoice-title {
+        text-align: right;
+      }
+
+      .shipping-labels {
+        flex-direction: row;
       }
     }
   </style>
@@ -406,10 +466,15 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
   <div class="invoice-container">
     <div class="header">
       <div class="company-info">
-        <div class="company-name">pixieblooms</div>
-        <div class="company-details">
-          <p>pixieblooms2512@gmail.com</p>
-          <p>${siteSettings.contact_phone}</p>
+        ${s.logo_url ? `<img src="${s.logo_url}" alt="Logo" class="company-logo" crossorigin="anonymous" />` : ''}
+        <div>
+          <div class="company-name">${s.company_name}</div>
+          ${s.company_tagline ? `<div class="company-tagline">${s.company_tagline}</div>` : ''}
+          <div class="company-details">
+            <p>${s.company_email}</p>
+            <p>${s.company_phone}</p>
+            ${s.company_gst ? `<p>GST: ${s.company_gst}</p>` : ''}
+          </div>
         </div>
       </div>
       <div class="invoice-title">
@@ -449,7 +514,7 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
           <tr>
             <td>
               <div class="item-details">
-                ${item.product_image ? `<img src="${item.product_image}" alt="${item.product_name}" class="product-image" crossorigin="anonymous" />` : ''}
+                ${s.show_product_images && item.product_image ? `<img src="${item.product_image}" alt="${item.product_name}" class="product-image" crossorigin="anonymous" />` : ''}
                 <div class="item-info">
                   <strong>${item.product_name}</strong>${detailsText}
                 </div>
@@ -480,20 +545,20 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
     </div>
 
     <div class="thank-you">
-      Thank you for your business!
+      ${s.thank_you_message}
     </div>
 
-    <div class="cut-line"></div>
+    ${s.show_cut_line ? `<div class="cut-line"></div>` : ''}
 
+    ${s.show_shipping_label ? `
     <div class="shipping-labels">
       <div class="label-box">
         <h3>From</h3>
-        <p><strong>Pixie Blooms</strong></p>
-        <p>Atchukattu Street</p>
-        <p>Thiruppathur</p>
-        <p>Tamil Nadu</p>
-        <p><strong>PIN:</strong> 630211</p>
-        <p><strong>Mobile:</strong> ${siteSettings.contact_phone}</p>
+        <p><strong>${s.from_name}</strong></p>
+        <p>${s.from_address}</p>
+        <p>${s.from_city}, ${s.from_state}</p>
+        <p><strong>PIN:</strong> ${s.from_pincode}</p>
+        <p><strong>Mobile:</strong> ${s.from_phone}</p>
       </div>
 
       <div class="label-box">
@@ -505,10 +570,11 @@ export function generateBillHTML(order: Order, siteSettings: SiteSettings, shipp
         <p><strong>Mobile:</strong> ${order.customer_phone}</p>
       </div>
     </div>
+    ` : ''}
 
     <div class="footer">
-      <p>This is a computer-generated invoice and does not require a signature.</p>
-      <p>For any queries, please contact us at pixieblooms2512@gmail.com</p>
+      <p>${s.footer_text}</p>
+      <p>For any queries, please contact us at ${s.company_email}</p>
     </div>
   </div>
 </body>
