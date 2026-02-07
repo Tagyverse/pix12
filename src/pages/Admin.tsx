@@ -917,15 +917,22 @@ export default function Admin() {
         try_on_models: ref(db, 'try_on_models'),
         tax_settings: ref(db, 'tax_settings'),
         footer_settings: ref(db, 'footer_settings'),
+        footer_config: ref(db, 'footer_config'),
         policies: ref(db, 'policies'),
         maintenance_settings: ref(db, 'maintenance_settings'),
         settings: ref(db, 'settings'),
+        bill_settings: ref(db, 'bill_settings'),
       };
 
       const snapshots = await Promise.all(
         Object.entries(dataRefs).map(async ([key, refPath]) => {
-          const snapshot = await get(refPath);
-          return [key, snapshot.exists() ? snapshot.val() : null];
+          try {
+            const snapshot = await get(refPath);
+            return [key, snapshot.exists() ? snapshot.val() : null];
+          } catch (err) {
+            console.warn(`Failed to fetch ${key}:`, err);
+            return [key, null];
+          }
         })
       );
 
@@ -943,25 +950,38 @@ export default function Admin() {
         body: JSON.stringify({ data: allData }),
       });
 
-      const result = await response.json();
+      // Try to parse JSON response
+      let result;
+      const responseText = await response.text();
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        // If response isn't JSON, create error object
+        result = { error: responseText || 'Unknown error occurred' };
+      }
 
       if (!response.ok) {
-        if (result.error?.includes('R2_BUCKET')) {
-          throw new Error('R2 storage is not configured. Please deploy to Cloudflare Pages to use the publish feature, or add R2 bucket binding in Cloudflare Dashboard.');
+        const errorMsg = result.error || 'Failed to publish';
+        if (errorMsg.includes('R2_BUCKET') || errorMsg.includes('R2 bucket')) {
+          throw new Error('R2 storage is not configured. Please add R2 bucket binding in Cloudflare Dashboard → Pages → Settings → Functions → R2 bucket bindings.');
         }
-        throw new Error(result.error || 'Failed to publish');
+        throw new Error(errorMsg);
       }
 
       setLastPublished(result.published_at);
       alert('Data published successfully! Users will now see the updated content.');
     } catch (error: any) {
       console.error('Error publishing data:', error);
-      if (error.message?.includes('Permission denied')) {
-        alert('Firebase permission denied. Please update your Firebase Database Rules to allow read/write access.');
-      } else if (error.message?.includes('R2')) {
-        alert(error.message);
+      const errorMessage = error?.message || String(error) || 'Unknown error';
+      
+      if (errorMessage.includes('Permission denied')) {
+        alert('Firebase permission denied. Please make sure you are logged in and have admin access.');
+      } else if (errorMessage.includes('R2')) {
+        alert(errorMessage);
+      } else if (errorMessage.includes('Failed to fetch')) {
+        alert('Network error. Please check your internet connection and try again.');
       } else {
-        alert(`Failed to publish data: ${error.message || 'Please try again.'}`);
+        alert(`Failed to publish data: ${errorMessage}`);
       }
     } finally {
       setIsPublishing(false);
