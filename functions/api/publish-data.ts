@@ -4,22 +4,36 @@ interface Env {
   R2_BUCKET: R2Bucket;
 }
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { request, env } = context as RequestContext<Env>;
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
 
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  };
+export const onRequest: PagesFunction<Env> = async (context) => {
+  const { request, env } = context as RequestContext<Env>;
 
   if (request.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     if (!env.R2_BUCKET) {
-      throw new Error('R2_BUCKET binding not configured. Please add R2 bucket binding in Cloudflare Dashboard.');
+      console.error('R2_BUCKET binding not configured');
+      return new Response(
+        JSON.stringify({ error: 'R2_BUCKET binding not configured. Please add R2 bucket binding in Cloudflare Dashboard.' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const body = await request.json();
@@ -41,11 +55,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const jsonContent = JSON.stringify(publishedData, null, 2);
     const fileName = 'site-data.json';
 
+    console.log('Publishing to R2:', fileName, 'Size:', jsonContent.length);
+
     await env.R2_BUCKET.put(fileName, jsonContent, {
       httpMetadata: {
         contentType: 'application/json',
       },
     });
+
+    console.log('Successfully published to R2');
 
     return new Response(
       JSON.stringify({
@@ -55,6 +73,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         fileName,
       }),
       {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
