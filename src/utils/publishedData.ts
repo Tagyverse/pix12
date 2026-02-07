@@ -23,9 +23,11 @@ interface PublishedData {
   try_on_models: Record<string, any> | null;
   tax_settings: any | null;
   footer_settings: any | null;
+  footer_config: any | null;
   policies: Record<string, any> | null;
   maintenance_settings: any | null;
   settings: any | null;
+  bill_settings: any | null;
   published_at?: string;
 }
 
@@ -42,15 +44,33 @@ export async function getPublishedData(): Promise<PublishedData | null> {
   try {
     const response = await fetch('/api/get-published-data');
     
+    // Get response as text first
+    const responseText = await response.text();
+    
     if (!response.ok) {
       if (response.status === 404) {
         console.log('No published data found, falling back to Firebase');
         return null;
       }
-      throw new Error('Failed to fetch published data');
+      console.error('Failed to fetch published data:', response.status, responseText);
+      return null;
     }
 
-    const data = await response.json();
+    // Try to parse JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('Failed to parse published data JSON:', parseError);
+      return null;
+    }
+
+    // Check if data has error property (API returned error as JSON)
+    if (data.error) {
+      console.log('API returned error:', data.error);
+      return null;
+    }
+
     cachedData = data;
     cacheTimestamp = Date.now();
     return data;
