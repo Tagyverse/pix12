@@ -107,6 +107,8 @@ function AppContent() {
   useEffect(() => {
     // Initialize analytics tracking
     initAnalytics();
+    // Initialize performance monitoring
+    initPerformanceMonitoring();
 
     const checkStoreStatus = async () => {
       try {
