@@ -110,13 +110,6 @@ function AppContent() {
 
     const checkStoreStatus = async () => {
       try {
-        const maintenanceRef = ref(db, 'maintenance_settings');
-        const maintenanceSnapshot = await get(maintenanceRef);
-        if (maintenanceSnapshot.exists()) {
-          const maintenanceData = maintenanceSnapshot.val();
-          setMaintenanceMode(maintenanceData.is_enabled || false);
-        }
-
         const settingsRef = ref(db, 'site_settings');
         const snapshot = await get(settingsRef);
         if (snapshot.exists()) {
