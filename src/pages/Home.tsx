@@ -22,6 +22,7 @@ import DynamicSection from '../components/DynamicSection';
 import InfoSection from '../components/InfoSection';
 import VideoSection from '../components/VideoSection';
 import VideoOverlaySection from '../components/VideoOverlaySection';
+import { getPublishedData, objectToArray } from '../utils/publishedData';
 import type { HomepageSection } from '../types';
 
 interface InfoSectionData {
