@@ -63,7 +63,7 @@ export default function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
           <div className="flex items-center gap-2 text-yellow-800">
             <Eye className="w-4 h-4" />
             <p className="text-sm font-medium">
-              Preview Mode: Showing latest published data from R2. To preview unpublished changes, click "Publish to Live" first, then use Preview.
+              Preview Mode: Viewing UNPUBLISHED changes from Firebase. Click "Publish to Live" to make these visible to users.
             </p>
           </div>
         </div>
