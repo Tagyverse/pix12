@@ -1,174 +1,83 @@
 import { useState, useEffect } from 'react';
-import { X, Gift, Copy, Check } from 'lucide-react';
-import { db } from '../lib/firebase';
-import { ref, get, update } from 'firebase/database';
-import { useAuth } from '../contexts/AuthContext';
-import type { Coupon } from '../types';
+import { X, Gift } from 'lucide-react';
+import { usePublishedData } from '../contexts/PublishedDataContext';
 
 export default function WelcomeCouponDialog() {
-  const { user } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
-  const [welcomeCoupon, setWelcomeCoupon] = useState<Coupon | null>(null);
-  const [copied, setCopied] = useState(false);
+  const { data: publishedData } = usePublishedData();
+  const [isVisible, setIsVisible] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [hasBeenShown, setHasBeenShown] = useState(false);
 
   useEffect(() => {
-    const checkAndShowWelcomeCoupon = async () => {
-      if (!user) return;
+    if (!publishedData?.settings || hasBeenShown) return;
 
-      try {
-        const userRef = ref(db, `users/${user.uid}`);
-        const userSnapshot = await get(userRef);
-
-        if (userSnapshot.exists()) {
-          const userData = userSnapshot.val();
-
-          if (!userData.welcome_coupon_shown) {
-            const couponsRef = ref(db, 'coupons');
-            const couponsSnapshot = await get(couponsRef);
-
-            if (couponsSnapshot.exists()) {
-              const coupons = couponsSnapshot.val();
-              const welcomeCouponEntry = Object.entries(coupons).find(
-                ([_, coupon]: [string, any]) =>
-                  coupon.is_active &&
-                  (coupon.code.toUpperCase().includes('WELCOME') ||
-                    coupon.code.toUpperCase().includes('NEW') ||
-                    coupon.description?.toLowerCase().includes('new user') ||
-                    coupon.description?.toLowerCase().includes('welcome'))
-              );
-
-              if (welcomeCouponEntry) {
-                const [couponId, couponData] = welcomeCouponEntry;
-                setWelcomeCoupon({ id: couponId, ...couponData } as Coupon);
-                setIsOpen(true);
-              }
-            }
-          }
-        } else {
-          await update(userRef, {
-            welcome_coupon_shown: false,
-            created_at: new Date().toISOString()
-          });
+    try {
+      const settingsArray = Object.values(publishedData.settings);
+      if (settingsArray.length > 0) {
+        const settings: any = settingsArray[0];
+        
+        if (settings.welcome_coupon_enabled && settings.welcome_coupon_code) {
+          setCouponCode(settings.welcome_coupon_code);
+          setTimeout(() => {
+            setIsVisible(true);
+            setHasBeenShown(true);
+          }, 3000);
         }
-      } catch (error) {
-        console.error('Error checking welcome coupon:', error);
       }
-    };
-
-    checkAndShowWelcomeCoupon();
-  }, [user]);
-
-  const handleClose = async () => {
-    if (user && welcomeCoupon) {
-      try {
-        const userRef = ref(db, `users/${user.uid}`);
-        await update(userRef, {
-          welcome_coupon_shown: true,
-          welcome_coupon_code: welcomeCoupon.code,
-          welcome_coupon_shown_at: new Date().toISOString()
-        });
-      } catch (error) {
-        console.error('Error updating user welcome coupon status:', error);
-      }
+    } catch (error) {
+      console.error('Error loading welcome coupon:', error);
     }
-    setIsOpen(false);
+  }, [publishedData, hasBeenShown]);
+
+  const handleClose = () => {
+    setIsVisible(false);
   };
 
   const handleCopy = () => {
-    if (welcomeCoupon) {
-      navigator.clipboard.writeText(welcomeCoupon.code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    navigator.clipboard.writeText(couponCode);
+    alert('Coupon code copied!');
+    handleClose();
   };
 
-  if (!isOpen || !welcomeCoupon) return null;
+  if (!isVisible || !couponCode) {
+    return null;
+  }
 
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose}></div>
-
-      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-w-md mx-auto w-full border-t-4 border-black animate-slide-up max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="bg-[#B5E5CF] p-6 relative border-b-4 border-black rounded-t-3xl flex-shrink-0">
-          <div className="w-12 h-1.5 bg-black rounded-full mx-auto mb-4"></div>
-          <button
-            onClick={handleClose}
-            className="absolute top-6 right-6 w-10 h-10 bg-white rounded-full flex items-center justify-center border-2 border-black hover:bg-gray-100 transition-all hover:scale-110"
-          >
-            <X className="w-5 h-5 text-black" />
-          </button>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all animate-scaleIn">
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4">
+            <Gift className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Welcome Gift!</h2>
+          <p className="text-purple-100">Here's a special coupon just for you</p>
         </div>
 
-        <div className="text-center p-8 bg-white overflow-y-auto flex-1">
-          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 border-3 border-black">
-            <Gift className="w-10 h-10 text-black" />
-          </div>
+        <div className="p-6">
+          <button
+            onClick={handleClose}
+            className="absolute top-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full transition-colors shadow-lg z-10"
+          >
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
 
-          <h2 className="text-3xl font-bold text-black mb-3">Welcome Gift!</h2>
-          <p className="text-black mb-6">
-            As a thank you for joining us, here's a special discount just for you!
-          </p>
-
-          {welcomeCoupon.description && (
-            <p className="text-sm text-black mb-4 italic font-medium">
-              {welcomeCoupon.description}
-            </p>
-          )}
-
-          <div className="bg-white rounded-2xl p-6 mb-6 border-3 border-black">
-            <p className="text-sm font-semibold text-black mb-2">Your Coupon Code</p>
-            <div className="flex items-center justify-center gap-3">
-              <div className="bg-[#B5E5CF] px-6 py-3 rounded-xl border-2 border-black">
-                <p className="text-2xl font-bold text-black tracking-wider">
-                  {welcomeCoupon.code}
-                </p>
-              </div>
-              <button
-                onClick={handleCopy}
-                className="p-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors border-2 border-black"
-                title="Copy code"
-              >
-                {copied ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  <Copy className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-center gap-2 text-sm text-black">
-                <span className="font-semibold">Discount:</span>
-                <span className="font-bold">
-                  {welcomeCoupon.discount_type === 'percentage'
-                    ? `${welcomeCoupon.discount_value}% OFF`
-                    : `₹${welcomeCoupon.discount_value} OFF`}
-                </span>
-              </div>
-
-              {welcomeCoupon.min_purchase && (
-                <p className="text-xs text-black">
-                  Min. purchase: ₹{welcomeCoupon.min_purchase}
-                </p>
-              )}
-
-              {welcomeCoupon.valid_until && (
-                <p className="text-xs text-black">
-                  Valid until: {new Date(welcomeCoupon.valid_until).toLocaleDateString()}
-                </p>
-              )}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 mb-6 border-2 border-dashed border-purple-300">
+            <p className="text-sm text-gray-600 mb-2 text-center">Your Coupon Code</p>
+            <div className="bg-white rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-purple-600 tracking-wider">{couponCode}</p>
             </div>
           </div>
 
           <button
-            onClick={handleClose}
-            className="w-full py-3 bg-[#B5E5CF] text-black rounded-xl font-bold hover:bg-white transition-all border-2 border-black"
+            onClick={handleCopy}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-xl font-semibold transition-all transform hover:scale-105"
           >
-            Start Shopping
+            Copy Code & Start Shopping
           </button>
 
-          <p className="text-xs text-black mt-4 font-medium">
-            Use this code at checkout to get your discount
+          <p className="text-xs text-gray-500 text-center mt-4">
+            This coupon can be applied at checkout
           </p>
         </div>
       </div>

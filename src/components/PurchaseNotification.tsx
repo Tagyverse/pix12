@@ -1,143 +1,85 @@
 import { useState, useEffect } from 'react';
-import { ShoppingBag, X } from 'lucide-react';
-import { db } from '../lib/firebase';
-import { ref, get } from 'firebase/database';
-import { Product } from '../types';
-
-const generateRandomIndianNumber = (): string => {
-  const lastDigit = Math.floor(Math.random() * 10);
-  return `+91********${lastDigit}`;
-};
-
-const getRandomDelay = () => {
-  return Math.floor(Math.random() * 10000) + 8000;
-};
+import { X } from 'lucide-react';
+import { usePublishedData } from '../contexts/PublishedDataContext';
 
 export default function PurchaseNotification() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [notification, setNotification] = useState<{
-    phone: string;
-    product: string;
-  } | null>(null);
+  const { data: publishedData } = usePublishedData();
   const [isVisible, setIsVisible] = useState(false);
-  const [popupEnabled, setPopupEnabled] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
-    checkPopupSetting();
-  }, []);
+    if (!publishedData?.settings) return;
 
-  const checkPopupSetting = async () => {
     try {
-      const settingsRef = ref(db, 'site_settings');
-      const settingsSnapshot = await get(settingsRef);
-
-      if (settingsSnapshot.exists()) {
-        const data = settingsSnapshot.val();
-        const settingsId = Object.keys(data)[0];
-        const settings = data[settingsId];
-        const isEnabled = settings.popup_enabled !== false;
-        setPopupEnabled(isEnabled);
-
-        if (isEnabled) {
-          fetchProducts();
+      const settingsArray = Object.values(publishedData.settings);
+      if (settingsArray.length > 0) {
+        const settings: any = settingsArray[0];
+        
+        if (settings.purchase_notifications_enabled && settings.purchase_notifications) {
+          setNotifications(settings.purchase_notifications);
         }
       }
     } catch (error) {
-      console.error('Error checking popup setting:', error);
+      console.error('Error loading purchase notifications:', error);
     }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      const productsRef = ref(db, 'products');
-      const snapshot = await get(productsRef);
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const productsData: Product[] = [];
-
-        Object.keys(data).forEach(key => {
-          if (data[key].in_stock) {
-            productsData.push({ id: key, ...data[key] });
-          }
-        });
-
-        setProducts(productsData.slice(0, 20));
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error);
-    }
-  };
+  }, [publishedData]);
 
   useEffect(() => {
-    if (products.length === 0 || !popupEnabled) return;
+    if (notifications.length === 0) return;
 
     const showNotification = () => {
-      const randomProduct = products[Math.floor(Math.random() * products.length)];
-      const phone = generateRandomIndianNumber();
-
-      setNotification({
-        phone,
-        product: randomProduct.name,
-      });
       setIsVisible(true);
-
       setTimeout(() => {
         setIsVisible(false);
         setTimeout(() => {
-          setNotification(null);
+          setCurrentIndex((prev) => (prev + 1) % notifications.length);
+          setTimeout(showNotification, 15000);
         }, 500);
       }, 5000);
     };
 
-    const initialDelay = setTimeout(() => {
-      showNotification();
+    const initialTimeout = setTimeout(showNotification, 3000);
 
-      const interval = setInterval(() => {
-        showNotification();
-      }, getRandomDelay());
+    return () => clearTimeout(initialTimeout);
+  }, [notifications]);
 
-      return () => clearInterval(interval);
-    }, getRandomDelay());
+  if (notifications.length === 0 || !isVisible) {
+    return null;
+  }
 
-    return () => clearTimeout(initialDelay);
-  }, [products, popupEnabled]);
-
-  const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(() => {
-      setNotification(null);
-    }, 500);
-  };
-
-  if (!notification || !popupEnabled) return null;
+  const notification = notifications[currentIndex];
 
   return (
     <div
-      className={`fixed top-24 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-500 ${
-        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      className={`fixed bottom-6 left-6 z-40 bg-white rounded-2xl shadow-2xl p-4 max-w-sm border-2 border-teal-200 transition-all duration-500 ${
+        isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
       }`}
     >
-      <div className="bg-white shadow-2xl rounded-lg border border-gray-200 px-5 py-3 flex items-center gap-3 min-w-[320px] max-w-[400px]">
-        <div className="bg-green-100 rounded-full p-2">
-          <ShoppingBag className="w-5 h-5 text-green-600" />
-        </div>
+      <button
+        onClick={() => setIsVisible(false)}
+        className="absolute -top-2 -right-2 bg-teal-500 hover:bg-teal-600 text-white rounded-full p-1 transition-colors"
+      >
+        <X className="w-4 h-4" />
+      </button>
 
+      <div className="flex items-center gap-3">
+        {notification.image_url && (
+          <img
+            src={notification.image_url}
+            alt={notification.product_name}
+            className="w-16 h-16 object-cover rounded-lg"
+          />
+        )}
         <div className="flex-1">
-          <p className="text-sm font-semibold text-gray-900">
-            {notification.phone}
-          </p>
-          <p className="text-xs text-gray-600">
-            just bought <span className="font-medium">{notification.product}</span>
-          </p>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs font-semibold text-green-600">RECENT PURCHASE</span>
+          </div>
+          <p className="text-sm font-semibold text-gray-900">{notification.customer_name}</p>
+          <p className="text-xs text-gray-600">purchased {notification.product_name}</p>
+          <p className="text-xs text-gray-500 mt-1">{notification.location} • {notification.time_ago}</p>
         </div>
-
-        <button
-          onClick={handleClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
       </div>
     </div>
   );
