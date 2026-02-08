@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, Component, ReactNode, lazy, Suspense } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -32,6 +34,7 @@ import { db } from './lib/firebase';
 import { ref, get, onValue } from 'firebase/database';
 import { initAnalytics } from './utils/analytics';
 import { initPerformanceMonitoring } from './utils/performanceMonitoring';
+import { initFetchInterceptor } from './utils/fetchInterceptor';
 
 type Page = 'home' | 'shop' | 'admin' | 'checkout' | 'superadmin' | 'privacy-policy' | 'shipping-policy' | 'refund-policy' | 'contact';
 
@@ -106,6 +109,8 @@ function AppContent() {
   const isAdminPage = currentPage === 'admin' || currentPage === 'superadmin';
 
   useEffect(() => {
+    // Initialize fetch interceptor to suppress validation warnings
+    initFetchInterceptor();
     // Initialize analytics tracking
     initAnalytics();
     // Initialize performance monitoring

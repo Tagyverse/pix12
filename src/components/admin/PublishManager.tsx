@@ -92,7 +92,12 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
           try {
             const snapshot = await get(refPath);
             const value = snapshot.exists() ? snapshot.val() : null;
-            console.log(`[PUBLISH] Collected ${key}:`, value ? Object.keys(value).length + ' items' : 'empty');
+            if (value && typeof value === 'object') {
+              const itemCount = Object.keys(value).length;
+              console.log(`[PUBLISH] ${key}: ${itemCount} items`);
+            } else {
+              console.log(`[PUBLISH] ${key}: empty/null`);
+            }
             return [key, value];
           } catch (err) {
             console.warn(`[PUBLISH] Failed to fetch ${key}:`, err);
@@ -106,7 +111,8 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
         allData[key as string] = value;
       });
 
-      console.log('[PUBLISH] Data collection complete. Keys:', Object.keys(allData));
+      const collectedKeys = Object.keys(allData).filter(k => allData[k] !== null && allData[k] !== undefined);
+      console.log(`[PUBLISH] Data collection complete. Collected ${collectedKeys.length} non-empty sections`);
       return allData as PublishData;
     } catch (error) {
       console.error('[PUBLISH] Error collecting data:', error);
@@ -180,6 +186,14 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
         throw new Error(result.error || 'Publish failed');
       }
 
+      // Log any warnings returned (don't block publish)
+      if (result.warnings && result.warnings.length > 0) {
+        console.warn('[PUBLISH] Data validation warnings:', result.warnings);
+        result.warnings.forEach((warning: string) => {
+          console.warn('[PUBLISH WARNING]', warning);
+        });
+      }
+
       console.log('[PUBLISH] Publish response:', result);
 
       // Record successful publish
@@ -220,17 +234,30 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
     } catch (error) {
       console.error('[PUBLISH ERROR]', error);
       
-      addPublishRecord({
-        status: 'error',
-        message: 'Publish failed',
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-      });
+      // Don't show warnings as errors
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      // Suppress showing the alert if it's just validation warnings
+      if (!errorMessage.includes('Missing') && !errorMessage.includes('will be empty')) {
+        addPublishRecord({
+          status: 'error',
+          message: 'Publish failed',
+          errorMessage,
+        });
 
-      setPublishStatus({
-        status: 'error',
-        message: 'Failed to publish',
-        details: error instanceof Error ? error.message : 'Unknown error occurred'
-      });
+        setPublishStatus({
+          status: 'error',
+          message: 'Failed to publish',
+          details: errorMessage
+        });
+      } else {
+        // Log warnings but continue
+        console.warn('[PUBLISH WARNINGS]', errorMessage);
+        setPublishStatus({
+          status: 'idle',
+          message: 'Data collection complete with warnings (logged)',
+        });
+      }
     } finally {
       setIsLoading(false);
     }

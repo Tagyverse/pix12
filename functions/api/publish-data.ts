@@ -20,20 +20,23 @@ const corsHeaders = {
 function validateData(data: Record<string, any>): { valid: boolean; warnings: string[] } {
   const warnings: string[] = [];
 
-  // Check all required data sections exist
-  const requiredSections = [
-    'products', 'categories', 'reviews', 'offers', 'site_settings',
-    'carousel_images', 'carousel_settings', 'homepage_sections',
+  // Critical sections that should exist
+  const criticalSections = ['products', 'categories', 'site_settings', 'navigation_settings'];
+  
+  // Optional sections that can be empty
+  const optionalSections = [
+    'reviews', 'offers', 'carousel_images', 'carousel_settings', 'homepage_sections',
     'info_sections', 'marquee_sections', 'video_sections',
     'video_section_settings', 'video_overlay_sections', 'video_overlay_items',
-    'default_sections_visibility', 'card_designs', 'navigation_settings',
+    'default_sections_visibility', 'card_designs',
     'coupons', 'try_on_models', 'tax_settings', 'footer_settings',
     'footer_config', 'policies', 'settings', 'bill_settings'
   ];
 
-  requiredSections.forEach(section => {
-    if (!data[section]) {
-      warnings.push(`Missing ${section} - this will be empty in published data`);
+  // Only warn about missing critical sections
+  criticalSections.forEach(section => {
+    if (!data[section] || Object.keys(data[section] || {}).length === 0) {
+      warnings.push(`Warning: ${section} is empty or missing`);
     }
   });
 
@@ -109,6 +112,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const validation = validateData(data);
     if (validation.warnings.length > 0) {
       console.warn('[PUBLISH] Data validation warnings:', validation.warnings);
+      console.warn('[PUBLISH] Warnings will be logged but publish will continue');
     }
 
     // Add timestamp to the data
