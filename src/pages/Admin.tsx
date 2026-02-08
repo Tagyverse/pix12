@@ -933,14 +933,6 @@ export default function Admin() {
   };
 
   const handlePublish = async () => {
-    // First validate the data
-    const validationResult = await validateCurrentData();
-    
-    if (!validationResult || !validationResult.valid) {
-      alert('Cannot publish: Your data has errors that must be fixed first.\n\nPlease check the validation panel for details.');
-      return;
-    }
-
     if (!confirm('Are you sure you want to publish all data to the live site? Users will see this data.')) {
       return;
     }
@@ -1022,13 +1014,12 @@ export default function Admin() {
       console.log('[ADMIN] ✓ site_content:', dataWithContent.includes('site_content') ? 'YES' : 'NO');
       console.log('[ADMIN] ✓ social_links:', dataWithContent.includes('social_links') ? 'YES' : 'NO');
       console.log('[ADMIN] ✓ marquee_sections:', dataWithContent.includes('marquee_sections') ? 'YES' : 'NO');
+      console.log('[ADMIN] ✓ navigation_settings:', dataWithContent.includes('navigation_settings') ? 'YES' : 'NO');
 
-      // Validate data exists
-      if (productCount === 0) {
-        throw new Error('No products found in Firebase. Please add products before publishing.');
-      }
-      if (categoryCount === 0) {
-        throw new Error('No categories found in Firebase. Please add categories before publishing.');
+      // Note: Don't block publish - let all data through, even if some sections are empty
+      // This allows publishing navigation, banners, footer, etc. without products
+      if (dataWithContent.length === 0) {
+        throw new Error('No data found to publish. Please add some content first.');
       }
 
       console.log('[ADMIN] Sending to R2...');
@@ -1089,13 +1080,17 @@ export default function Admin() {
       // Refresh history panel
       setHistoryRefresh(prev => prev + 1);
       
-      const successMsg = `Data published successfully!
+      let successMsg = `Data published successfully!
 Products: ${result.productCount || productCount}
 Categories: ${result.categoryCount || categoryCount}
 Size: ${result.size ? (result.size / 1024).toFixed(2) + ' KB' : 'unknown'}
 Upload Time: ${result.uploadTime || '?'}ms
 Verify Time: ${result.verifyTime || '?'}ms
 Users will now see the updated content.`;
+
+      if (result.warnings && result.warnings.length > 0) {
+        successMsg += `\n\nWarnings:\n${result.warnings.join('\n')}`;
+      }
       
       alert(successMsg);
       
@@ -1717,7 +1712,7 @@ Users will now see the updated content.`;
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₹)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Price (���)</label>
                   <input
                     type="number"
                     step="0.01"

@@ -14,36 +14,38 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-// Validate and sanitize data before publishing
-function validateData(data: Record<string, any>): { valid: boolean; errors: string[] } {
-  const errors: string[] = [];
+// Validate data - log warnings but don't block publish
+function validateData(data: Record<string, any>): { valid: boolean; warnings: string[] } {
+  const warnings: string[] = [];
 
-  // Check for required keys
-  const requiredKeys = ['products', 'categories'];
-  requiredKeys.forEach(key => {
-    if (data[key] === undefined) {
-      errors.push(`Missing required field: ${key}`);
-    }
-  });
+  // Optional validation - log warnings but don't block
+  if (!data.products || Object.keys(data.products || {}).length === 0) {
+    warnings.push('No products found - this is optional');
+  }
+  
+  if (!data.categories || Object.keys(data.categories || {}).length === 0) {
+    warnings.push('No categories found - this is optional');
+  }
 
-  // Validate products structure
+  // Validate products structure if present
   if (data.products && typeof data.products === 'object') {
     Object.entries(data.products).forEach(([id, product]: any) => {
-      if (!product.name) errors.push(`Product ${id} missing name`);
-      if (!product.price && product.price !== 0) errors.push(`Product ${id} missing price`);
+      if (!product.name) warnings.push(`Product ${id} missing name`);
+      if (!product.price && product.price !== 0) warnings.push(`Product ${id} missing price`);
     });
   }
 
-  // Validate categories structure
+  // Validate categories structure if present
   if (data.categories && typeof data.categories === 'object') {
     Object.entries(data.categories).forEach(([id, category]: any) => {
-      if (!category.name) errors.push(`Category ${id} missing name`);
+      if (!category.name) warnings.push(`Category ${id} missing name`);
     });
   }
 
+  // Always allow publish to happen
   return {
-    valid: errors.length === 0,
-    errors,
+    valid: true,
+    warnings,
   };
 }
 
@@ -83,20 +85,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       });
     }
 
-    // Validate data before publishing
+    // Validate data before publishing (warnings only, don't block)
     const validation = validateData(data);
-    if (!validation.valid) {
-      console.warn('Data validation errors:', validation.errors);
-      return new Response(
-        JSON.stringify({
-          error: 'Data validation failed',
-          details: validation.errors,
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+    if (validation.warnings.length > 0) {
+      console.warn('[PUBLISH] Data validation warnings:', validation.warnings);
     }
 
     // Add timestamp to the data
@@ -155,6 +147,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         dataKeys: Object.keys(data),
         productCount: Object.keys(data.products || {}).length,
         categoryCount: Object.keys(data.categories || {}).length,
+        warnings: validation.warnings,
       }),
       {
         status: 200,
