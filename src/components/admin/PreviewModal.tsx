@@ -90,7 +90,7 @@ export default function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
         {/* Footer */}
         <div className="bg-gray-50 border-t-2 border-gray-200 px-6 py-4 flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            <span className="font-semibold">Note:</span> This preview shows data from Firebase (admin). Users see published data from R2.
+            <span className="font-semibold">Note:</span> Preview shows published R2 data. Make changes in admin, then publish to see them here.
           </p>
           <button
             onClick={onClose}
