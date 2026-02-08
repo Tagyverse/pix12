@@ -18,6 +18,7 @@ interface NavigationProps {
 export default function Navigation({ currentPage, onNavigate, onLoginClick, onCartClick, onOrdersClick, onProductClick }: NavigationProps) {
   const { user, signOut } = useAuth();
   const { itemCount, addToCart } = useCart();
+  const { data: publishedData } = usePublishedData();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
