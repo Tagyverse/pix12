@@ -971,6 +971,8 @@ export default function Admin() {
         // Banner and Social data
         social_links: ref(db, 'social_links'),
         site_content: ref(db, 'site_content'),
+        // Navigation customization
+        navigation_settings: ref(db, 'navigation_settings'),
       };
 
       console.log('[ADMIN] Fetching Firebase data...');
