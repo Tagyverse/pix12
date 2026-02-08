@@ -79,7 +79,7 @@ export async function loadPreviewDataFromFirebase(): Promise<PreviewData | null>
       video_overlay_items: ref(db, 'video_overlay_items'),
       default_sections_visibility: ref(db, 'default_sections_visibility'),
       card_designs: ref(db, 'card_designs'),
-      navigation_settings: ref(db, 'navigation/style'),
+      navigation_settings: ref(db, 'navigation_settings'),
       coupons: ref(db, 'coupons'),
       try_on_models: ref(db, 'try_on_models'),
       tax_settings: ref(db, 'tax_settings'),
