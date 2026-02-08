@@ -108,31 +108,18 @@ export default function Navigation({ currentPage, onNavigate, onLoginClick, onCa
   }, [user]);
 
   useEffect(() => {
-    async function fetchProducts() {
-      setLoading(true);
+    if (searchOpen && publishedData?.products) {
       try {
-        const productsRef = ref(db, 'products');
-        const productsSnapshot = await get(productsRef);
-
-        const productsData: Product[] = [];
-        if (productsSnapshot.exists()) {
-          const data = productsSnapshot.val();
-          Object.keys(data).forEach(key => {
-            productsData.push({ id: key, ...data[key] });
-          });
-        }
+        setLoading(true);
+        const productsData: Product[] = objectToArray<Product>(publishedData.products);
         setProducts(productsData);
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
+        console.error('Error loading products:', error);
         setLoading(false);
       }
     }
-
-    if (searchOpen) {
-      fetchProducts();
-    }
-  }, [searchOpen]);
+  }, [searchOpen, publishedData]);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
