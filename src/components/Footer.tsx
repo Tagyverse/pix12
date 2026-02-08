@@ -207,6 +207,11 @@ export default function Footer({ onNavigate }: FooterProps) {
               Made with <Heart size={16} style={{ color: config.accentColor }} fill={config.accentColor} /> for you
             </p>
           </div>
+          <div className="text-center mt-4 pt-4" style={{ borderColor: config.accentColor + '20', borderTopWidth: '1px' }}>
+            <p className="text-xs" style={{ color: config.textColor, opacity: 0.7 }}>
+              Crafted by <a href="https://tagyverse.com" target="_blank" rel="noopener noreferrer" className="font-semibold hover:opacity-100" style={{ color: config.linkColor }}>Tagyverse</a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
