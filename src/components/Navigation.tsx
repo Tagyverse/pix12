@@ -81,31 +81,19 @@ export default function Navigation({ currentPage, onNavigate, onLoginClick, onCa
   }, [publishedData]);
 
   useEffect(() => {
-    async function checkAdminStatus() {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
-
-      try {
-        const adminRef = ref(db, `admins/${user.uid}`);
-        const superAdminRef = ref(db, `super_admins/${user.uid}`);
-
-        const [adminSnapshot, superAdminSnapshot] = await Promise.all([
-          get(adminRef),
-          get(superAdminRef)
-        ]);
-
-        const isAdminUser = adminSnapshot.exists() || superAdminSnapshot.exists();
-        setIsAdmin(isAdminUser);
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-      }
+    if (!user) {
+      setIsAdmin(false);
+      return;
     }
 
-    checkAdminStatus();
-  }, [user]);
+    try {
+      const isAdminUser = publishedData?.admins?.[user.uid] || publishedData?.super_admins?.[user.uid];
+      setIsAdmin(!!isAdminUser);
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    }
+  }, [user, publishedData]);
 
   useEffect(() => {
     if (searchOpen && publishedData?.products) {
