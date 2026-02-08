@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { ShoppingBag, Search, Home as HomeIcon, Store, User, LogOut, Settings, X, ShoppingCart, Package } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -49,8 +51,14 @@ export default function Navigation({ currentPage, onNavigate, onLoginClick, onCa
   });
 
   useEffect(() => {
-    if (!publishedData?.navigation_settings) {
-      console.log('[NAVIGATION] No navigation_settings in published data');
+    // Use default navigation style while loading
+    if (!publishedData) {
+      console.log('[NAVIGATION] Data still loading, using defaults');
+      return;
+    }
+
+    if (!publishedData.navigation_settings) {
+      console.log('[NAVIGATION] No navigation_settings in published data, using defaults');
       return;
     }
 
@@ -364,7 +372,7 @@ export default function Navigation({ currentPage, onNavigate, onLoginClick, onCa
                       className="flex gap-4 bg-white rounded-2xl p-4 border-2 border-teal-200 hover:border-teal-400 transition-all cursor-pointer group"
                     >
                       <img
-                        src={product.image_url}
+                        src={product.image_url || "/placeholder.svg"}
                         alt={product.name}
                         className="w-20 h-20 object-cover rounded-xl border-2 border-gray-200 group-hover:scale-105 transition-transform"
                       />

@@ -1,4 +1,6 @@
 import type { RequestContext } from '@cloudflare/workers-types';
+import { R2Bucket } from '@cloudflare/workers-types';
+import { PagesFunction } from '@cloudflare/workers-types';
 
 interface Env {
   R2_BUCKET: R2Bucket;
@@ -18,28 +20,46 @@ const corsHeaders = {
 function validateData(data: Record<string, any>): { valid: boolean; warnings: string[] } {
   const warnings: string[] = [];
 
-  // Optional validation - log warnings but don't block
-  if (!data.products || Object.keys(data.products || {}).length === 0) {
-    warnings.push('No products found - this is optional');
-  }
-  
-  if (!data.categories || Object.keys(data.categories || {}).length === 0) {
-    warnings.push('No categories found - this is optional');
-  }
+  // Check all required data sections exist
+  const requiredSections = [
+    'products', 'categories', 'reviews', 'offers', 'site_settings',
+    'carousel_images', 'carousel_settings', 'homepage_sections',
+    'info_sections', 'marquee_sections', 'video_sections',
+    'video_section_settings', 'video_overlay_sections', 'video_overlay_items',
+    'default_sections_visibility', 'card_designs', 'navigation_settings',
+    'coupons', 'try_on_models', 'tax_settings', 'footer_settings',
+    'footer_config', 'policies', 'settings', 'bill_settings'
+  ];
+
+  requiredSections.forEach(section => {
+    if (!data[section]) {
+      warnings.push(`Missing ${section} - this will be empty in published data`);
+    }
+  });
 
   // Validate products structure if present
   if (data.products && typeof data.products === 'object') {
-    Object.entries(data.products).forEach(([id, product]: any) => {
-      if (!product.name) warnings.push(`Product ${id} missing name`);
-      if (!product.price && product.price !== 0) warnings.push(`Product ${id} missing price`);
-    });
+    const productCount = Object.keys(data.products).length;
+    if (productCount === 0) {
+      warnings.push('No products found - this is optional');
+    } else {
+      Object.entries(data.products).forEach(([id, product]: any) => {
+        if (!product.name) warnings.push(`Product ${id} missing name`);
+        if (!product.price && product.price !== 0) warnings.push(`Product ${id} missing price`);
+      });
+    }
   }
 
   // Validate categories structure if present
   if (data.categories && typeof data.categories === 'object') {
-    Object.entries(data.categories).forEach(([id, category]: any) => {
-      if (!category.name) warnings.push(`Category ${id} missing name`);
-    });
+    const categoryCount = Object.keys(data.categories).length;
+    if (categoryCount === 0) {
+      warnings.push('No categories found - this is optional');
+    } else {
+      Object.entries(data.categories).forEach(([id, category]: any) => {
+        if (!category.name) warnings.push(`Category ${id} missing name`);
+      });
+    }
   }
 
   // Always allow publish to happen

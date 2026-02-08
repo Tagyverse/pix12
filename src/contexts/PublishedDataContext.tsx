@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getPublishedData } from '../utils/publishedData';
 import { loadPreviewDataFromFirebase } from './PreviewContext';
@@ -54,24 +56,29 @@ export function PublishedDataProvider({ children }: { children: ReactNode }) {
       const isPreviewMode = urlParams.get('preview') === 'true';
 
       if (isPreviewMode) {
-        console.log('Preview mode: Loading from Firebase');
+        console.log('[DATA-CONTEXT] Preview mode: Loading from Firebase');
         const firebaseData = await loadPreviewDataFromFirebase();
         if (firebaseData) {
+          console.log('[DATA-CONTEXT] Preview data loaded successfully');
           setData(firebaseData as any);
         } else {
+          console.warn('[DATA-CONTEXT] Failed to load preview data');
           setError(true);
         }
       } else {
         // Normal mode: Load from R2
+        console.log('[DATA-CONTEXT] Normal mode: Loading from R2');
         const publishedData = await getPublishedData();
         if (publishedData) {
+          console.log('[DATA-CONTEXT] Published data loaded successfully, keys:', Object.keys(publishedData || {}));
           setData(publishedData);
         } else {
+          console.warn('[DATA-CONTEXT] Failed to load published data');
           setError(true);
         }
       }
     } catch (err) {
-      console.error('Error loading data:', err);
+      console.error('[DATA-CONTEXT] Error loading data:', err);
       setError(true);
     } finally {
       setLoading(false);

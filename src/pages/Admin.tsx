@@ -1,5 +1,9 @@
+'use client';
+
+import React from "react"
+
 import { useEffect, useState } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, Save, X, FolderOpen, Video, Star, CheckCircle, XCircle, MessageSquare, Megaphone, Settings, ShoppingBag, Package, Truck, FileText, Image, Printer, Type, Eye, EyeOff, Heart, Layers, Palette, Share2, Tag, Users, Receipt, Footprints, Brain, BarChart3, Wrench, Upload, Loader2 } from 'lucide-react';
+import { Plus, CreditCard as Edit2, Trash2, Save, X, FolderOpen, Video, Star, CheckCircle, XCircle, MessageSquare, Megaphone, Settings, ShoppingBag, Package, Truck, FileText, ImageIcon, Printer, Type, Eye, EyeOff, Heart, Layers, Palette, Share2, Tag, Users, Receipt, Footprints, Brain, BarChart3, Wrench, Upload, Loader2 } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { ref, get, set, update, remove, push } from 'firebase/database';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,6 +37,7 @@ import { downloadBillAsPDF, downloadBillAsJPG, printBill } from '../utils/billGe
 import DataValidationPanel from '../components/admin/DataValidationPanel';
 import { validateFirebaseData, type ValidationResult } from '../utils/dataValidator';
 import PublishHistoryPanel from '../components/admin/PublishHistoryPanel';
+import PublishManager from '../components/admin/PublishManager';
 import { addPublishRecord } from '../utils/publishHistory';
 
 interface Order {
@@ -90,7 +95,7 @@ export default function Admin() {
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showOfferForm, setShowOfferForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'offers' | 'orders' | 'carousel' | 'marquee' | 'sections' | 'card-design' | 'banner-social' | 'navigation' | 'coupons' | 'bulk-operations' | 'try-on' | 'tax' | 'footer' | 'ai-assistant' | 'traffic' | 'gallery' | 'bill-customizer' | 'settings'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'categories' | 'offers' | 'orders' | 'carousel' | 'marquee' | 'sections' | 'card-design' | 'banner-social' | 'navigation' | 'coupons' | 'bulk-operations' | 'try-on' | 'tax' | 'footer' | 'ai-assistant' | 'traffic' | 'gallery' | 'bill-customizer' | 'settings' | 'publish'>('products');
   const [isPublishing, setIsPublishing] = useState(false);
   const [lastPublished, setLastPublished] = useState<string | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
@@ -1361,7 +1366,7 @@ Users will now see the updated content.`;
               }`}
             >
               <div className="flex items-center gap-2">
-                <Image className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 Carousel
               </div>
             </button>
@@ -1608,7 +1613,7 @@ Users will now see the updated content.`;
               }`}
             >
               <div className="flex items-center gap-2">
-                <Image className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 R2 Gallery
               </div>
             </button>
@@ -1648,6 +1653,25 @@ Users will now see the updated content.`;
               <div className="flex items-center gap-2">
                 <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
                 Settings
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('publish');
+                setShowForm(false);
+                setShowCategoryForm(false);
+                setShowReviewForm(false);
+                setShowOfferForm(false);
+              }}
+              className={`pb-4 px-4 sm:px-6 font-bold transition-colors whitespace-nowrap text-sm sm:text-base ${
+                activeTab === 'publish'
+                  ? 'border-b-4 border-green-500 text-green-600'
+                  : 'text-gray-600 hover:text-green-600'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
+                Publish to Live
               </div>
             </button>
           </div>
@@ -2895,7 +2919,7 @@ Users will now see the updated content.`;
                             }}
                             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg border-2 border-blue-700"
                           >
-                            <Image className="w-5 h-5" />
+                            <ImageIcon className="w-5 h-5" />
                             JPG
                           </button>
                           <button
@@ -2936,7 +2960,7 @@ Users will now see the updated content.`;
               <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-2xl p-6 sm:p-8 text-white">
                 <div className="flex items-center gap-4 mb-3">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <Image className="w-6 h-6" />
+                    <ImageIcon className="w-6 h-6" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Carousel Images</h2>
@@ -3256,6 +3280,19 @@ Users will now see the updated content.`;
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'publish' && (
+            <div className="space-y-6">
+              <PublishManager onPublishComplete={() => {
+                setHistoryRefresh(prev => prev + 1);
+              }} />
+              
+              <div className="bg-white rounded-2xl p-6 border-2 border-gray-200">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Publication History</h3>
+                <PublishHistoryPanel refreshTrigger={historyRefresh} />
               </div>
             </div>
           )}
