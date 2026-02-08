@@ -29,6 +29,9 @@ interface PublishedData {
   policies: Record<string, any> | null;
   settings: any | null;
   bill_settings: any | null;
+  // Banner and social
+  social_links: Record<string, any> | null;
+  site_content: Record<string, any> | null;
   published_at?: string;
   version?: string;
 }
@@ -68,6 +71,9 @@ async function getDataFromFirebase(): Promise<PublishedData | null> {
       policies: ref(db, 'policies'),
       settings: ref(db, 'settings'),
       bill_settings: ref(db, 'bill_settings'),
+      // Banner and social data
+      social_links: ref(db, 'social_links'),
+      site_content: ref(db, 'site_content'),
     };
 
     const snapshots = await Promise.all(
@@ -141,6 +147,10 @@ export async function getPublishedData(): Promise<PublishedData | null> {
     try {
       data = JSON.parse(responseText);
       console.log(`[R2] Successfully fetched and parsed data in ${fetchTime}ms`);
+      console.log('[R2] Available data keys:', Object.keys(data).filter(k => !k.includes('_at')));
+      console.log('[R2] site_content:', !!data.site_content);
+      console.log('[R2] social_links:', !!data.social_links);
+      console.log('[R2] marquee_sections:', !!data.marquee_sections);
     } catch (parseError) {
       console.error('[R2] Failed to parse published data JSON:', parseError);
       return await getDataFromFirebase();

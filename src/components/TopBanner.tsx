@@ -12,7 +12,10 @@ export default function TopBanner() {
   let bannerContent = defaultContent;
   
   if (publishedData?.site_content?.top_banner?.value) {
+    console.log('[TOP-BANNER] Using published data');
     bannerContent = publishedData.site_content.top_banner.value;
+  } else {
+    console.log('[TOP-BANNER] Using default content');
   }
   
   if (publishedData?.default_sections_visibility?.marquee !== undefined) {

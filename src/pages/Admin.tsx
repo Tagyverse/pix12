@@ -976,6 +976,9 @@ export default function Admin() {
         policies: ref(db, 'policies'),
         settings: ref(db, 'settings'),
         bill_settings: ref(db, 'bill_settings'),
+        // Banner and Social data
+        social_links: ref(db, 'social_links'),
+        site_content: ref(db, 'site_content'),
       };
 
       console.log('[ADMIN] Fetching Firebase data...');
@@ -998,10 +1001,13 @@ export default function Admin() {
       let productCount = 0;
       let categoryCount = 0;
       
+      const dataWithContent: string[] = [];
+      
       snapshots.forEach(([key, value]) => {
         allData[key as string] = value;
         if (value) {
           dataCount++;
+          dataWithContent.push(key as string);
           if (key === 'products' && typeof value === 'object') {
             productCount = Object.keys(value).length;
           }
@@ -1012,6 +1018,10 @@ export default function Admin() {
       });
 
       console.log(`[ADMIN] Data collected: ${dataCount} sections with ${productCount} products and ${categoryCount} categories`);
+      console.log('[ADMIN] Sections with data:', dataWithContent.sort());
+      console.log('[ADMIN] ✓ site_content:', dataWithContent.includes('site_content') ? 'YES' : 'NO');
+      console.log('[ADMIN] ✓ social_links:', dataWithContent.includes('social_links') ? 'YES' : 'NO');
+      console.log('[ADMIN] ✓ marquee_sections:', dataWithContent.includes('marquee_sections') ? 'YES' : 'NO');
 
       // Validate data exists
       if (productCount === 0) {

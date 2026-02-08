@@ -31,6 +31,10 @@ export default function WelcomeBanner() {
   };
 
   const bannerContent = publishedData?.site_content?.welcome_banner?.value || defaultBannerContent;
+  
+  if (publishedData?.site_content?.welcome_banner?.value) {
+    console.log('[WELCOME-BANNER] Using published banner data');
+  }
 
   const defaultSocialLinks: SocialLink[] = [
     {
@@ -51,11 +55,14 @@ export default function WelcomeBanner() {
 
   let socialLinks: SocialLink[] = defaultSocialLinks;
   if (publishedData?.social_links) {
+    console.log('[WELCOME-BANNER] Using published social links');
     const linksArray = Object.entries(publishedData.social_links).map(([id, link]: [string, any]) => ({
       id,
       ...link
     }));
     socialLinks = linksArray.sort((a, b) => a.order - b.order);
+  } else {
+    console.log('[WELCOME-BANNER] Using default social links');
   }
 
   if (!bannerContent.isVisible) {
