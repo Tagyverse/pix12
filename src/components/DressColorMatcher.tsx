@@ -70,6 +70,7 @@ const getColorName = (hex: string): string => {
 };
 
 export default function DressColorMatcher({ isOpen, onClose, currentProduct }: DressColorMatcherProps) {
+  const { data: publishedData } = usePublishedData();
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [detectedColors, setDetectedColors] = useState<ColorInfo[]>([]);
   const [matchedProducts, setMatchedProducts] = useState<MatchedProduct[]>([]);
