@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { getPublishedData } from '../utils/publishedData';
+import { loadPreviewDataFromFirebase } from './PreviewContext';
 
 interface PublishedData {
   products: Record<string, any> | null;
