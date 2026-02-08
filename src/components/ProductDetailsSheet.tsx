@@ -127,8 +127,7 @@ export default function ProductDetailsSheet({ product, isOpen, onClose, onCartCl
           .sort(() => Math.random() - 0.5)
           .slice(0, 6);
 
-        setSuggestedProducts(shuffled);
-      }
+      setSuggestedProducts(shuffled);
     } catch (error) {
       console.error('Error loading suggested products:', error);
     }
