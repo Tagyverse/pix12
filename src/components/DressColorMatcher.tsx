@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Upload, Sparkles, CheckCircle, AlertCircle, Loader, Camera, Image as ImageIcon } from 'lucide-react';
-import { db } from '../lib/firebase';
-import { ref, get } from 'firebase/database';
+import { usePublishedData } from '../contexts/PublishedDataContext';
+import { objectToArray } from '../utils/publishedData';
 import type { Product } from '../types';
 import LazyImage from './LazyImage';
 
