@@ -122,50 +122,63 @@ export async function getPublishedData(): Promise<PublishedData | null> {
     console.log('[R2] Fetching published data from R2...');
     const fetchStart = Date.now();
     
-    const response = await fetch('/api/get-published-data', {
-      headers: {
-        'Cache-Control': 'public, max-age=300',
-      },
-    });
+    // Use optimized fetch with abort timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
     
-    const fetchTime = Date.now() - fetchStart;
-    
-    // Get response as text first
-    const responseText = await response.text();
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        console.log('[R2] No published data found (404), falling back to Firebase');
+    try {
+      const response = await fetch('/api/get-published-data', {
+        headers: {
+          'Cache-Control': 'public, max-age=300',
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      const fetchTime = Date.now() - fetchStart;
+      
+      // Get response as text first
+      const responseText = await response.text();
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log('[R2] No published data found (404), falling back to Firebase');
+          return await getDataFromFirebase();
+        }
+        console.error('[R2] Failed to fetch published data:', response.status, responseText);
         return await getDataFromFirebase();
       }
-      console.error('[R2] Failed to fetch published data:', response.status, responseText);
+
+      // Try to parse JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log(`[R2] ✓ Data loaded in ${fetchTime}ms`);
+        console.log(`[R2] ✓ Found ${Object.keys(data).length} data sections`);
+      } catch (parseError) {
+        console.error('[R2] Failed to parse published data JSON:', parseError);
+        return await getDataFromFirebase();
+      }
+
+      // Check if data has error property (API returned error as JSON)
+      if (data.error) {
+        console.log('[R2] API returned error:', data.error);
+        return await getDataFromFirebase();
+      }
+
+      cachedData = data;
+      cacheTimestamp = Date.now();
+      console.log('[R2] ✓ Cache updated');
+      return data;
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.warn('[R2] Request timeout after 15s, falling back to Firebase');
+      } else {
+        console.error('[R2] Error fetching published data:', fetchError);
+      }
       return await getDataFromFirebase();
     }
-
-    // Try to parse JSON
-    let data;
-    try {
-      data = JSON.parse(responseText);
-      console.log(`[R2] Successfully fetched and parsed data in ${fetchTime}ms`);
-      console.log('[R2] Available data keys:', Object.keys(data).filter(k => !k.includes('_at')));
-      console.log('[R2] site_content:', !!data.site_content);
-      console.log('[R2] social_links:', !!data.social_links);
-      console.log('[R2] marquee_sections:', !!data.marquee_sections);
-    } catch (parseError) {
-      console.error('[R2] Failed to parse published data JSON:', parseError);
-      return await getDataFromFirebase();
-    }
-
-    // Check if data has error property (API returned error as JSON)
-    if (data.error) {
-      console.log('[R2] API returned error:', data.error);
-      return await getDataFromFirebase();
-    }
-
-    cachedData = data;
-    cacheTimestamp = Date.now();
-    console.log('[R2] Data cached successfully');
-    return data;
   } catch (error) {
     console.error('[R2] Error fetching published data:', error);
     console.log('[R2] Attempting Firebase fallback...');

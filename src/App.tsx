@@ -35,6 +35,8 @@ import { ref, get, onValue } from 'firebase/database';
 import { initAnalytics } from './utils/analytics';
 import { initPerformanceMonitoring } from './utils/performanceMonitoring';
 import { initFetchInterceptor } from './utils/fetchInterceptor';
+import { enableSmoothScrollCSS } from './utils/smoothScroll';
+import PageLoader from './components/PageLoader';
 
 type Page = 'home' | 'shop' | 'admin' | 'checkout' | 'superadmin' | 'privacy-policy' | 'shipping-policy' | 'refund-policy' | 'contact';
 
@@ -109,6 +111,8 @@ function AppContent() {
   const isAdminPage = currentPage === 'admin' || currentPage === 'superadmin';
 
   useEffect(() => {
+    // Enable smooth scrolling
+    enableSmoothScrollCSS();
     // Initialize fetch interceptor to suppress validation warnings
     initFetchInterceptor();
     // Initialize analytics tracking
@@ -283,6 +287,12 @@ function AppContent() {
 
   return (
     <>
+      <PageLoader 
+        isVisible={showSplash && publishedDataLoading} 
+        progress={showSplash ? 50 : 100}
+        message="Loading Pixie Blooms..."
+      />
+      
       {showSplash && <SplashScreen onComplete={() => {
         setShowSplash(false);
         setAppReady(true);
