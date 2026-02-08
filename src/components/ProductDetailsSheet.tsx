@@ -135,26 +135,16 @@ export default function ProductDetailsSheet({ product, isOpen, onClose, onCartCl
   };
 
   const loadWishlistProducts = async () => {
-    if (favorites.length === 0) {
+    if (favorites.length === 0 || !publishedData?.products) {
       setWishlistProducts([]);
       return;
     }
 
     try {
-      const productsRef = ref(db, 'products');
-      const snapshot = await get(productsRef);
+      const allProducts = objectToArray<Product>(publishedData.products)
+        .filter((p: Product) => favorites.includes(p.id) && (p.isVisible !== false));
 
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const allProducts = Object.entries(data)
-          .map(([id, prod]: [string, any]) => ({
-            id,
-            ...prod,
-          }))
-          .filter((p: Product) => favorites.includes(p.id) && (p.isVisible !== false));
-
-        setWishlistProducts(allProducts);
-      }
+      setWishlistProducts(allProducts);
     } catch (error) {
       console.error('Error loading wishlist products:', error);
     }
