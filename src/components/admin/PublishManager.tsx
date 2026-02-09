@@ -50,7 +50,7 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
   const [isLoading, setIsLoading] = useState(false);
   const [dataPreview, setDataPreview] = useState<any>(null);
 
-  const navigationStyleRef = ref(db, 'navigation/style');
+  const navigationStyleRef = ref(db, 'navigation_settings');
 
   // Collect all data from Firebase
   const collectAllData = async (): Promise<PublishData> => {
@@ -113,30 +113,21 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
         allData[key as string] = value;
       });
 
-      // Get navigation_settings from navigation/style path in Firebase with fallback
+      // Get navigation_settings from Firebase
       try {
-        console.log('[PUBLISH] Reading navigation/style from Firebase...');
+        console.log('[PUBLISH] Reading navigation_settings from Firebase...');
         const navStyleSnapshot = await get(navigationStyleRef);
-        console.log('[PUBLISH] navigation/style exists:', navStyleSnapshot.exists());
+        console.log('[PUBLISH] navigation_settings exists:', navStyleSnapshot.exists());
         
         if (navStyleSnapshot.exists()) {
           allData.navigation_settings = navStyleSnapshot.val();
-          console.log('[PUBLISH] navigation_settings: successfully loaded from navigation/style', allData.navigation_settings);
+          console.log('[PUBLISH] navigation_settings: successfully loaded', allData.navigation_settings);
         } else {
-          // Fallback: try to read from settings/navigation
-          console.log('[PUBLISH] navigation/style not found, trying backup location settings/navigation...');
-          const backupSnapshot = await get(ref(db, 'settings/navigation'));
-          
-          if (backupSnapshot.exists()) {
-            allData.navigation_settings = backupSnapshot.val();
-            console.log('[PUBLISH] navigation_settings: successfully loaded from backup location settings/navigation', allData.navigation_settings);
-          } else {
-            console.log('[PUBLISH] WARNING: navigation settings not found in either location - will use defaults on publish');
-            allData.navigation_settings = null;
-          }
+          console.log('[PUBLISH] WARNING: navigation_settings not found in Firebase - will use defaults on publish');
+          allData.navigation_settings = null;
         }
       } catch (err) {
-        console.warn('[PUBLISH] Failed to fetch navigation settings:', err);
+        console.warn('[PUBLISH] Failed to fetch navigation_settings:', err);
         allData.navigation_settings = null;
       }
 

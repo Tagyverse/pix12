@@ -117,13 +117,13 @@ export default function NavigationCustomizer() {
 
   const loadNavigation = async () => {
     try {
-      console.log('[NAV] Loading from navigation/style...');
-      const navStyleRef = ref(db, 'navigation/style');
+      console.log('[NAV] Loading from navigation_settings...');
+      const navStyleRef = ref(db, 'navigation_settings');
       const styleSnap = await get(navStyleRef);
 
       if (styleSnap.exists()) {
         const style = styleSnap.val();
-        console.log('[NAV] Loaded navigation/style:', style);
+        console.log('[NAV] Loaded navigation_settings:', style);
         setNavBgColor(style.background || '#ffffff');
         setNavTextColor(style.text || '#111827');
         setActiveTabColor(style.activeTab || '#14b8a6');
@@ -144,7 +144,7 @@ export default function NavigationCustomizer() {
           });
         }
       } else {
-        console.log('[NAV] No navigation/style found, using defaults');
+        console.log('[NAV] No navigation_settings found, using defaults');
       }
     } catch (error) {
       console.error('[NAV] Error loading navigation:', error);
@@ -166,18 +166,14 @@ export default function NavigationCustomizer() {
         savedAt: new Date().toISOString()
       };
 
-      console.log('[NAV] Saving to navigation/style:', styleData);
+      console.log('[NAV] Saving to navigation_settings:', styleData);
       
-      // Save to navigation/style
-      await set(ref(db, 'navigation/style'), styleData);
-      console.log('[NAV] Successfully saved to navigation/style');
-
-      // Also save to a backup location for redundancy
-      await set(ref(db, 'settings/navigation'), styleData);
-      console.log('[NAV] Saved backup copy to settings/navigation');
+      // Save to the correct Firebase path that matches the Rules
+      await set(ref(db, 'navigation_settings'), styleData);
+      console.log('[NAV] Successfully saved to navigation_settings');
 
       // Verify the save worked by reading it back
-      const verifySnapshot = await get(ref(db, 'navigation/style'));
+      const verifySnapshot = await get(ref(db, 'navigation_settings'));
       if (verifySnapshot.exists()) {
         console.log('[NAV] Verification SUCCESS: Data was saved and can be read back:', verifySnapshot.val());
         alert('Navigation settings saved successfully! Remember to click "Publish to Live" to update the live site.');
