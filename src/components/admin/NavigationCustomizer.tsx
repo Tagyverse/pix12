@@ -117,20 +117,13 @@ export default function NavigationCustomizer() {
 
   const loadNavigation = async () => {
     try {
-      // Try loading from navigation_settings path first (new structure)
-      const navSettingsRef = ref(db, 'navigation_settings');
-      let styleSnap = await get(navSettingsRef);
-
-      // If not found, try navigation/style path (old structure)
-      if (!styleSnap.exists()) {
-        console.log('[NAV] navigation_settings not found, trying navigation/style...');
-        const navStyleRef = ref(db, 'navigation/style');
-        styleSnap = await get(navStyleRef);
-      }
+      console.log('[NAV] Loading from navigation/style...');
+      const navStyleRef = ref(db, 'navigation/style');
+      const styleSnap = await get(navStyleRef);
 
       if (styleSnap.exists()) {
         const style = styleSnap.val();
-        console.log('[NAV] Loaded navigation settings:', style);
+        console.log('[NAV] Loaded navigation/style:', style);
         setNavBgColor(style.background || '#ffffff');
         setNavTextColor(style.text || '#111827');
         setActiveTabColor(style.activeTab || '#14b8a6');
@@ -151,7 +144,7 @@ export default function NavigationCustomizer() {
           });
         }
       } else {
-        console.log('[NAV] No navigation settings found, using defaults');
+        console.log('[NAV] No navigation/style found, using defaults');
       }
     } catch (error) {
       console.error('[NAV] Error loading navigation:', error);
@@ -172,18 +165,9 @@ export default function NavigationCustomizer() {
         buttonLabels: buttonLabels
       };
 
-      console.log('[NAV] Saving navigation settings:', styleData);
-      
-      // Try saving to navigation_settings path first (new structure)
-      try {
-        await set(ref(db, 'navigation_settings'), styleData);
-        console.log('[NAV] Successfully saved to navigation_settings');
-      } catch (navSettingsError) {
-        console.warn('[NAV] Failed to save to navigation_settings, trying navigation/style:', navSettingsError);
-        // Fallback to navigation/style path (old structure) if navigation_settings fails
-        await set(ref(db, 'navigation/style'), styleData);
-        console.log('[NAV] Successfully saved to navigation/style');
-      }
+      console.log('[NAV] Saving to navigation/style:', styleData);
+      await set(ref(db, 'navigation/style'), styleData);
+      console.log('[NAV] Successfully saved to navigation/style');
 
       alert('Navigation settings saved successfully! Remember to click "Publish to Live" to update the live site.');
       
@@ -192,10 +176,9 @@ export default function NavigationCustomizer() {
         loadNavigation();
       }, 500);
     } catch (error) {
-      console.error('[NAV] Error saving navigation to both paths:', error);
+      console.error('[NAV] Error saving navigation:', error);
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       
-      // Provide helpful error message
       if (errorMsg.includes('Permission denied')) {
         alert('Failed to save: Firebase permissions issue. Please check admin access and try again.');
       } else if (errorMsg.includes('PERMISSION_DENIED')) {
