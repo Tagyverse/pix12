@@ -459,16 +459,16 @@
       ".write": "auth != null",
       ".validate": "newData.hasChildren(['background', 'text', 'activeTab', 'inactiveButton']) || newData.hasChild('background')",
       "background": {
-        ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#[0-9A-Fa-f]{6}$|^#[0-9A-Fa-f]{8}$/))"
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/))"
       },
       "text": {
-        ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#[0-9A-Fa-f]{6}$|^#[0-9A-Fa-f]{8}$/))"
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/))"
       },
       "activeTab": {
-        ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#[0-9A-Fa-f]{6}$|^#[0-9A-Fa-f]{8}$/))"
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/))"
       },
       "inactiveButton": {
-        ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#[0-9A-Fa-f]{6}$|^#[0-9A-Fa-f]{8}$/))"
+        ".validate": "!newData.exists() || (newData.isString() && newData.val().matches(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/))"
       },
       "borderRadius": {
         ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'full' || newData.val() === 'lg' || newData.val() === 'md' || newData.val() === 'sm'))"
