@@ -1,8 +1,9 @@
 /**
  * Permission Manager - Handle browser permissions for camera, microphone, notifications, etc.
+ * All functions are safe to call in sandboxed/non-HTTPS environments and will gracefully degrade.
  */
 
-interface PermissionStatus {
+interface PermissionStatusResult {
   camera: PermissionState | null;
   microphone: PermissionState | null;
   notification: PermissionState | null;
@@ -12,17 +13,28 @@ interface PermissionStatus {
 export type PermissionType = 'camera' | 'microphone' | 'notification' | 'geolocation';
 
 /**
+ * Check if mediaDevices API is available (requires HTTPS or localhost)
+ */
+function isMediaDevicesAvailable(): boolean {
+  return typeof navigator !== 'undefined' && 
+    'mediaDevices' in navigator && 
+    typeof navigator.mediaDevices.getUserMedia === 'function';
+}
+
+/**
  * Request camera permission
  */
 export async function requestCameraPermission(): Promise<boolean> {
+  if (!isMediaDevicesAvailable()) {
+    console.warn('[PERMISSION] Camera API not available (requires HTTPS or localhost)');
+    return false;
+  }
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    // Stop the stream after getting permission
     stream.getTracks().forEach(track => track.stop());
-    console.log('[PERMISSION] Camera permission granted');
     return true;
   } catch (error) {
-    console.error('[PERMISSION] Camera permission denied:', error);
+    console.warn('[PERMISSION] Camera permission denied or unavailable:', (error as Error).message);
     return false;
   }
 }
@@ -31,14 +43,16 @@ export async function requestCameraPermission(): Promise<boolean> {
  * Request microphone permission
  */
 export async function requestMicrophonePermission(): Promise<boolean> {
+  if (!isMediaDevicesAvailable()) {
+    console.warn('[PERMISSION] Microphone API not available (requires HTTPS or localhost)');
+    return false;
+  }
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // Stop the stream after getting permission
     stream.getTracks().forEach(track => track.stop());
-    console.log('[PERMISSION] Microphone permission granted');
     return true;
   } catch (error) {
-    console.error('[PERMISSION] Microphone permission denied:', error);
+    console.warn('[PERMISSION] Microphone permission denied or unavailable:', (error as Error).message);
     return false;
   }
 }
@@ -47,32 +61,27 @@ export async function requestMicrophonePermission(): Promise<boolean> {
  * Request notification permission
  */
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (!('Notification' in window)) {
-    console.warn('[PERMISSION] Notifications not supported');
+  if (typeof window === 'undefined' || !('Notification' in window)) {
+    console.warn('[PERMISSION] Notifications not supported in this environment');
     return false;
   }
 
   if (Notification.permission === 'granted') {
-    console.log('[PERMISSION] Notification permission already granted');
     return true;
   }
 
-  if (Notification.permission !== 'denied') {
-    try {
-      const permission = await Notification.requestPermission();
-      const granted = permission === 'granted';
-      if (granted) {
-        console.log('[PERMISSION] Notification permission granted');
-      }
-      return granted;
-    } catch (error) {
-      console.error('[PERMISSION] Error requesting notification permission:', error);
-      return false;
-    }
+  if (Notification.permission === 'denied') {
+    console.warn('[PERMISSION] Notification permission was previously denied');
+    return false;
   }
 
-  console.warn('[PERMISSION] Notification permission was previously denied');
-  return false;
+  try {
+    const permission = await Notification.requestPermission();
+    return permission === 'granted';
+  } catch (error) {
+    console.warn('[PERMISSION] Error requesting notification permission:', (error as Error).message);
+    return false;
+  }
 }
 
 /**
@@ -80,108 +89,98 @@ export async function requestNotificationPermission(): Promise<boolean> {
  */
 export async function requestGeolocationPermission(): Promise<boolean> {
   return new Promise((resolve) => {
-    if (!navigator.geolocation) {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
       console.warn('[PERMISSION] Geolocation not supported');
       resolve(false);
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      () => {
-        console.log('[PERMISSION] Geolocation permission granted');
-        resolve(true);
-      },
-      (error) => {
-        console.error('[PERMISSION] Geolocation permission denied:', error);
-        resolve(false);
-      }
+      () => resolve(true),
+      () => resolve(false),
+      { timeout: 10000 }
     );
   });
 }
 
 /**
- * Request popup window permission (automatic on most browsers)
+ * Open a popup window (safe with popup blockers)
  */
-export function allowPopup(url: string, windowName: string = '_blank', windowFeatures: string = 'width=800,height=600'): Window | null {
+export function allowPopup(url: string, windowName = '_blank', windowFeatures = 'width=800,height=600'): Window | null {
   try {
     const popup = window.open(url, windowName, windowFeatures);
-    if (popup) {
-      console.log('[PERMISSION] Popup window opened');
-      return popup;
-    } else {
-      console.warn('[PERMISSION] Popup blocked - user may have popup blocking enabled');
+    if (!popup || popup.closed) {
+      console.warn('[PERMISSION] Popup was blocked by the browser');
       return null;
     }
+    return popup;
   } catch (error) {
-    console.error('[PERMISSION] Error opening popup:', error);
+    console.warn('[PERMISSION] Error opening popup:', (error as Error).message);
     return null;
   }
 }
 
 /**
- * Check current permission status
+ * Check current permission status (non-throwing)
  */
-export async function checkPermissionStatus(): Promise<PermissionStatus> {
-  const status: PermissionStatus = {
+export async function checkPermissionStatus(): Promise<PermissionStatusResult> {
+  const status: PermissionStatusResult = {
     camera: null,
     microphone: null,
     notification: null,
     geolocation: null
   };
 
+  // Check camera
   try {
-    // Check camera
     if ('permissions' in navigator) {
       const cameraStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
       status.camera = cameraStatus.state;
     }
-  } catch (error) {
-    console.error('[PERMISSION] Error checking camera status:', error);
-  }
+  } catch { /* not supported in this browser */ }
 
+  // Check microphone
   try {
-    // Check microphone
     if ('permissions' in navigator) {
       const micStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
       status.microphone = micStatus.state;
     }
-  } catch (error) {
-    console.error('[PERMISSION] Error checking microphone status:', error);
-  }
+  } catch { /* not supported in this browser */ }
 
+  // Check notification
   try {
-    // Check notification
     if ('Notification' in window) {
       status.notification = Notification.permission as PermissionState;
     }
-  } catch (error) {
-    console.error('[PERMISSION] Error checking notification status:', error);
-  }
+  } catch { /* not supported in this browser */ }
 
+  // Check geolocation
   try {
-    // Check geolocation
     if ('permissions' in navigator) {
       const geoStatus = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
       status.geolocation = geoStatus.state;
     }
-  } catch (error) {
-    console.error('[PERMISSION] Error checking geolocation status:', error);
-  }
+  } catch { /* not supported in this browser */ }
 
   return status;
 }
 
 /**
- * Request all permissions
+ * Request all permissions (gracefully handles failures)
  */
 export async function requestAllPermissions(): Promise<Record<string, boolean>> {
-  const results = {
-    camera: await requestCameraPermission(),
-    microphone: await requestMicrophonePermission(),
-    notification: await requestNotificationPermission(),
-    geolocation: await requestGeolocationPermission(),
-    popup: true // Popups are typically allowed by default
-  };
+  const [camera, microphone, notification, geolocation] = await Promise.allSettled([
+    requestCameraPermission(),
+    requestMicrophonePermission(),
+    requestNotificationPermission(),
+    requestGeolocationPermission(),
+  ]);
 
-  return results;
+  return {
+    camera: camera.status === 'fulfilled' ? camera.value : false,
+    microphone: microphone.status === 'fulfilled' ? microphone.value : false,
+    notification: notification.status === 'fulfilled' ? notification.value : false,
+    geolocation: geolocation.status === 'fulfilled' ? geolocation.value : false,
+    popup: true,
+  };
 }

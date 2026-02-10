@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState, useCallback } from 'react';
 import { getPublishedData, clearPublishedDataCache } from '../utils/publishedData';
 

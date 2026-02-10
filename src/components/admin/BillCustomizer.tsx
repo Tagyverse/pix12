@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect, useRef } from 'react';
 import { FileText, Save, Eye, Upload, X, Type, Palette, Layout, ImageIcon, Loader2 } from 'lucide-react';
 import { db } from '../../lib/firebase';

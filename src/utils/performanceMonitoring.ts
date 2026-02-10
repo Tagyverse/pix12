@@ -18,22 +18,19 @@ export function initPerformanceMonitoring() {
   // Only run in production to avoid noise in development
   if (import.meta.env.DEV) return;
 
-  // Log page load performance
+  // Log page load performance using modern Navigation Timing API (Level 2)
   window.addEventListener('load', () => {
     setTimeout(() => {
-      const perfData = window.performance.timing;
-      const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-      const connectTime = perfData.responseEnd - perfData.requestStart;
-      const renderTime = perfData.domComplete - perfData.domLoading;
+      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      if (navEntries.length > 0) {
+        const nav = navEntries[0];
+        const pageLoadTime = nav.loadEventEnd - nav.startTime;
+        const connectTime = nav.responseEnd - nav.requestStart;
+        const renderTime = nav.domComplete - nav.domInteractive;
 
-      console.log('Performance Metrics:', {
-        pageLoadTime: `${pageLoadTime}ms`,
-        connectTime: `${connectTime}ms`,
-        renderTime: `${renderTime}ms`,
-      });
-
-      // Send to analytics if needed
-      logPerformanceMetric('page_load', pageLoadTime);
+        // Send to analytics if needed
+        logPerformanceMetric('page_load', pageLoadTime);
+      }
     }, 0);
   });
 

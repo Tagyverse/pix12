@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect, Component, ReactNode, lazy, Suspense } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';

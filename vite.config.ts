@@ -4,13 +4,7 @@ import react from '@vitejs/plugin-react';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react({
-      babel: {
-        plugins: [
-          ['@babel/plugin-proposal-class-properties', { loose: true }],
-        ],
-      },
-    }),
+    react(),
   ],
   build: {
     target: 'ES2020',
@@ -35,7 +29,6 @@ export default defineConfig({
         chunkFileNames: 'chunks/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
-        compact: true,
       },
     },
     chunkSizeWarningLimit: 800,
@@ -55,7 +48,6 @@ export default defineConfig({
       },
     },
     cssCodeSplit: true,
-    cssMinify: 'lightningcss',
     sourcemap: false,
     reportCompressedSize: false,
     commonjsOptions: {
@@ -64,9 +56,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['lucide-react', '@mediapipe/face_mesh', '@mediapipe/camera_utils'],
-    include: ['react', 'react-dom', 'firebase/app', 'firebase/auth', 'firebase/database'],
-    holdVendorChunkNames: true,
+    exclude: ['@mediapipe/face_mesh', '@mediapipe/camera_utils'],
+    include: ['react', 'react-dom', 'firebase/app', 'firebase/auth', 'firebase/database', 'lucide-react'],
     esbuildOptions: {
       supported: {
         bigint: true,
@@ -75,11 +66,6 @@ export default defineConfig({
     },
   },
   server: {
-    middlewareMode: true,
-    hmr: {
-      protocol: 'ws',
-      host: 'localhost',
-      port: 5173,
-    },
+    hmr: true,
   },
 });

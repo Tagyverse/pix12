@@ -61,15 +61,17 @@ export const monitorWebVitals = () => {
     }
   }
 
-  // Navigation timing
-  if ('performance' in window && 'navigation' in performance) {
+  // Navigation timing using modern Navigation Timing API (Level 2)
+  if ('performance' in window && 'getEntriesByType' in performance) {
     window.addEventListener('load', () => {
       setTimeout(() => {
-        const perfData = performance.timing;
-        vitals.TTFB = perfData.responseStart - perfData.navigationStart;
-        vitals.domContentLoaded = perfData.domContentLoadedEventEnd - perfData.navigationStart;
-        vitals.pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-        console.log('[Performance] Vitals:', vitals);
+        const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        if (navEntries.length > 0) {
+          const nav = navEntries[0];
+          vitals.TTFB = nav.responseStart - nav.startTime;
+          vitals.domContentLoaded = nav.domContentLoadedEventEnd - nav.startTime;
+          vitals.pageLoadTime = nav.loadEventEnd - nav.startTime;
+        }
       }, 0);
     });
   }

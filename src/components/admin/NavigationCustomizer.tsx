@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Save, RotateCcw } from 'lucide-react';
 import { db, auth } from '../../lib/firebase';

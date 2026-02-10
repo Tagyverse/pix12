@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Save, X, Plus, Trash2, Eye, EyeOff, Loader2, Link as LinkIcon, Instagram, Facebook, Twitter, Mail, MessageCircle, Linkedin, Youtube, AtSign, Sparkles } from 'lucide-react';
 import { db } from '../../lib/firebase';
