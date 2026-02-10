@@ -770,6 +770,81 @@
       }
     },
 
+    "navigation_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "background": {
+        ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+      },
+      "text": {
+        ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+      },
+      "activeTab": {
+        ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+      },
+      "inactiveButton": {
+        ".validate": "newData.isString() && newData.val().matches(/^#[0-9a-fA-F]{6}$/)"
+      },
+      "borderRadius": {
+        ".validate": "newData.isString() && (newData.val() === 'full' || newData.val() === 'lg' || newData.val() === 'md' || newData.val() === 'sm')"
+      },
+      "buttonSize": {
+        ".validate": "newData.isString() && (newData.val() === 'sm' || newData.val() === 'md' || newData.val() === 'lg')"
+      },
+      "themeMode": {
+        ".validate": "newData.isString() && (newData.val() === 'default' || newData.val() === 'dark' || newData.val() === 'light')"
+      },
+      "buttonLabels": {
+        ".validate": "newData.hasChildren() || !newData.exists()"
+      },
+      "$other": {
+        ".validate": false
+      }
+    },
+
+    "banner_social_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      "banner_bg_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "banner_text_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "social_bg_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "social_text_color": {
+        ".validate": "!newData.exists() || newData.isString()"
+      },
+      "$other": {
+        ".validate": false
+      }
+    },
+
+    "publish_limits": {
+      ".read": true,
+      ".write": "auth != null",
+      "$userId": {
+        ".write": "auth != null && auth.uid === $userId",
+        "count": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10"
+        },
+        "month": {
+          ".validate": "newData.isString()"
+        },
+        "last_published": {
+          ".validate": "!newData.exists() || newData.isString()"
+        }
+      }
+    },
+
+    "bill_settings": {
+      ".read": true,
+      ".write": "auth != null",
+      ".validate": "newData.hasChildren() || !newData.exists()"
+    },
+
     "navigation": {
       ".read": true,
       "tabs": {
