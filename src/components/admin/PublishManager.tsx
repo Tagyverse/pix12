@@ -6,6 +6,7 @@ import { db } from '../../lib/firebase';
 import { ref, get } from 'firebase/database';
 import { useAuth } from '../../contexts/AuthContext';
 import { addPublishRecord } from '../../utils/publishHistory';
+import { checkPublishLimit, incrementPublishCount, getRemainingPublishes } from '../../utils/publishLimitTracker';
 
 interface PublishData {
   products: Record<string, any> | null;
@@ -51,8 +52,25 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
   const [publishStatus, setPublishStatus] = useState<PublishStatus>({ status: 'idle', message: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [dataPreview, setDataPreview] = useState<any>(null);
+  const [remainingPublishes, setRemainingPublishes] = useState<number>(10);
 
   const navigationStyleRef = ref(db, 'navigation_settings');
+
+  useEffect(() => {
+    if (user) {
+      checkAndUpdateRemainingPublishes();
+    }
+  }, [user]);
+
+  const checkAndUpdateRemainingPublishes = async () => {
+    if (!user) return;
+    try {
+      const remaining = await getRemainingPublishes(user.uid);
+      setRemainingPublishes(remaining);
+    } catch (error) {
+      console.error('[PUBLISH] Error checking remaining publishes:', error);
+    }
+  };
 
   // Collect all data from Firebase
   const collectAllData = async (): Promise<PublishData> => {
@@ -182,6 +200,22 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
       return;
     }
 
+    // Check publish limit
+    try {
+      const limitCheck = await checkPublishLimit(user.uid);
+      if (!limitCheck.allowed) {
+        setPublishStatus({
+          status: 'error',
+          message: 'Publish limit reached',
+          details: limitCheck.message
+        });
+        return;
+      }
+      console.log('[PUBLISH LIMIT]', limitCheck.message);
+    } catch (error) {
+      console.error('[PUBLISH LIMIT] Error checking limit:', error);
+    }
+
     if (!confirm('Are you sure you want to publish all changes to live? This will update the data visible to all users.')) {
       return;
     }
@@ -230,6 +264,14 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
 
       console.log('[PUBLISH] Publish response:', result);
 
+      // Increment publish count
+      try {
+        await incrementPublishCount(user.uid);
+        await checkAndUpdateRemainingPublishes();
+      } catch (error) {
+        console.error('[PUBLISH LIMIT] Error updating limit:', error);
+      }
+
       // Record successful publish
       addPublishRecord({
         status: 'success',
@@ -246,7 +288,7 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
       setPublishStatus({
         status: 'success',
         message: 'Successfully published to live!',
-        details: `${productCount} products, ${categoryCount} categories, ${(totalSize / 1024).toFixed(2)}KB uploaded`,
+        details: `${productCount} products, ${categoryCount} categories, ${(totalSize / 1024).toFixed(2)}KB uploaded. ${remainingPublishes - 1} publishes remaining this month.`,
         dataStats: {
           productCount,
           categoryCount,
@@ -301,13 +343,19 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 sm:p-8 text-white">
-        <div className="flex items-center gap-4 mb-3">
-          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-            <Upload className="w-6 h-6" />
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <Upload className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold">Publish to Live</h2>
+              <p className="text-blue-100 mt-1">Push all Firebase changes to R2 for live site updates</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold">Publish to Live</h2>
-            <p className="text-blue-100 mt-1">Push all Firebase changes to R2 for live site updates</p>
+          <div className="bg-white/20 px-4 py-2 rounded-lg text-right">
+            <p className="text-sm text-blue-100">Publishes Remaining</p>
+            <p className="text-3xl font-bold">{remainingPublishes}/10</p>
           </div>
         </div>
       </div>

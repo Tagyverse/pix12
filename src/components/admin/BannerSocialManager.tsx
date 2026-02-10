@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { Save, X, Plus, Trash2, Eye, EyeOff, Loader2, Link as LinkIcon, Instagram, Facebook, Twitter, Mail, MessageCircle, Linkedin, Youtube, AtSign, Sparkles } from 'lucide-react';
 import { db } from '../../lib/firebase';
@@ -30,7 +32,14 @@ export default function BannerSocialManager() {
   const [bannerData, setBannerData] = useState({
     title: 'Welcome to Pixie Blooms!',
     subtitle: 'Discover our exclusive collection of handcrafted hair accessories',
-    isVisible: true
+    isVisible: true,
+    bg_color: '#ffffff',
+    text_color: '#000000'
+  });
+
+  const [socialSettings, setSocialSettings] = useState({
+    bg_color: '#f5f5f5',
+    text_color: '#000000'
   });
 
   const [socialLinksVisible, setSocialLinksVisible] = useState(true);

@@ -163,10 +163,6 @@ export default function NavigationCustomizer() {
         return;
       }
 
-      // Get fresh auth token to ensure valid credentials
-      const idToken = await user.getIdToken();
-      console.log('[NAV] User authenticated, ID token obtained:', user.uid);
-
       const styleData = {
         background: navBgColor,
         text: navTextColor,
@@ -180,20 +176,19 @@ export default function NavigationCustomizer() {
 
       console.log('[NAV] Saving to navigation_settings:', styleData);
       
-      // Save directly without validation - let Firebase rules handle it
+      // Save to Firebase
       await set(ref(db, 'navigation_settings'), styleData);
-      console.log('[NAV] Successfully saved to navigation_settings');
-
-      alert('Navigation settings saved successfully! Remember to click "Publish to Live" to update the live site.');
       
-      // Reload to verify persistence
-      setTimeout(() => {
-        loadNavigation();
-      }, 500);
+      // Save to localStorage for instant persistence (no reload needed)
+      localStorage.setItem('navigation_settings', JSON.stringify(styleData));
+      console.log('[NAV] Successfully saved to Firebase and localStorage');
+
+      alert('Navigation settings saved successfully!');
+      // NO RELOAD - data already saved to localStorage and component state
     } catch (error) {
       console.error('[NAV] Error saving navigation:', error);
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      alert('Failed to save navigation settings.\n\nError: ' + errorMsg);
+      alert('Failed to save navigation settings: ' + errorMsg);
     } finally {
       setSaving(false);
     }

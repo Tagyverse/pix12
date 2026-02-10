@@ -1,5 +1,7 @@
+'use client';
+
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Save, Eye, Upload, X, Type, Palette, Layout, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { FileText, Save, Eye, Upload, X, Type, Palette, Layout, ImageIcon, Loader2 } from 'lucide-react';
 import { db } from '../../lib/firebase';
 import { ref, get, set } from 'firebase/database';
 import R2ImageSelectorDialog from './R2ImageSelectorDialog';
@@ -127,7 +129,13 @@ export default function BillCustomizer() {
     try {
       const settingsRef = ref(db, 'bill_settings');
       await set(settingsRef, settings);
+      
+      // Save to localStorage for instant access in orders
+      localStorage.setItem('bill_settings', JSON.stringify(settings));
+      console.log('[BILL] Settings saved to Firebase and localStorage');
+      
       alert('Bill settings saved successfully!');
+      // NO RELOAD - settings persisted in localStorage
     } catch (error) {
       console.error('Error saving bill settings:', error);
       alert('Failed to save settings');
@@ -311,7 +319,7 @@ export default function BillCustomizer() {
                 <div className="flex items-center gap-4">
                   {settings.logo_url ? (
                     <div className="relative">
-                      <img src={settings.logo_url} alt="Logo" className="w-16 h-16 object-contain border rounded-lg" />
+                      <img src={settings.logo_url || "/placeholder.svg"} alt="Logo" className="w-16 h-16 object-contain border rounded-lg" />
                       <button
                         onClick={() => handleChange('logo_url', '')}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
