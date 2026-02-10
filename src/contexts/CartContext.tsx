@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { db } from '../lib/firebase';
 import { ref, onValue } from 'firebase/database';
@@ -97,6 +99,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (items.length > 0) {
       localStorage.setItem('cart', JSON.stringify(items));
+    } else {
+      localStorage.removeItem('cart');
     }
   }, [items]);
 

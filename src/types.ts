@@ -34,6 +34,7 @@ export interface Product {
   hairclip_type?: 'side' | 'top' | 'back' | 'headband' | 'full';
   availableColors?: string[];
   created_at: string;
+  createdAt?: string;
   updated_at: string;
 }
 

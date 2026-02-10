@@ -1,4 +1,6 @@
-import { ArrowRight, Sparkles, Heart, Package, Star, ShoppingCart, MessageCircle, Shield } from 'lucide-react';
+'use client';
+
+import { ArrowRight, Sparkles, Heart, Star } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { db } from '../lib/firebase';
 import { ref, get } from 'firebase/database';
@@ -90,7 +92,7 @@ export default function Home({ onNavigate, onCartClick }: HomeProps) {
     customer_reviews: false,
     marquee: false
   });
-  const [allSectionsOrder, setAllSectionsOrder] = useState<Array<{ id: string; type: 'default' | 'custom' | 'info'; order_index: number }>>([]);
+  const [allSectionsOrder, setAllSectionsOrder] = useState<Array<{ id: string; type: 'default' | 'custom' | 'info' | 'marquee' | 'video'; order_index: number }>>([]);
   const [showSmartFeatureFAB, setShowSmartFeatureFAB] = useState(false);
   const [showTryOnList, setShowTryOnList] = useState(false);
   const [showColorMatchList, setShowColorMatchList] = useState(false);
@@ -133,8 +135,8 @@ export default function Home({ onNavigate, onCartClick }: HomeProps) {
           const featuredProducts = allProducts
             .filter(p => p.featured)
             .sort((a, b) => {
-              const dateA = new Date(a.createdAt || 0).getTime();
-              const dateB = new Date(b.createdAt || 0).getTime();
+              const dateA = new Date(a.created_at || 0).getTime();
+              const dateB = new Date(b.created_at || 0).getTime();
               return dateB - dateA;
             })
             .slice(0, 3);
@@ -381,7 +383,7 @@ export default function Home({ onNavigate, onCartClick }: HomeProps) {
                   }`}
                 >
                   <img
-                    src={image}
+                    src={image || "/placeholder.svg"}
                     alt={`Slide ${index + 1}`}
                     className="w-full h-full object-cover object-center"
                   />

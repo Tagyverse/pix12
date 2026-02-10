@@ -1,5 +1,7 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import { Filter, SlidersHorizontal, ShoppingCart, Heart, Star, X, MessageCircle, Shield } from 'lucide-react';
+import { Filter, SlidersHorizontal, ShoppingCart, Heart, X } from 'lucide-react';
 import { db } from '../lib/firebase';
 import { ref, get } from 'firebase/database';
 import { useCart } from '../contexts/CartContext';
