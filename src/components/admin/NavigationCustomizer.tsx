@@ -175,46 +175,16 @@ export default function NavigationCustomizer() {
         borderRadius: borderRadius,
         buttonSize: buttonSize,
         themeMode: themeMode,
-        buttonLabels: buttonLabels,
-        updated_at: new Date().toISOString()
+        buttonLabels: buttonLabels
       };
 
       console.log('[NAV] Saving to navigation_settings:', styleData);
       
-      // Validate data matches Firebase rules requirements
-      const hexColorRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-      if (!hexColorRegex.test(navBgColor) || !hexColorRegex.test(navTextColor) || 
-          !hexColorRegex.test(activeTabColor) || !hexColorRegex.test(inactiveButtonColor)) {
-        throw new Error('Invalid color format. All colors must be valid hex colors (e.g., #ffffff)');
-      }
-      
-      if (!['full', 'lg', 'md', 'sm'].includes(borderRadius)) {
-        throw new Error('Invalid borderRadius. Must be one of: full, lg, md, sm');
-      }
-      
-      if (!['sm', 'md', 'lg'].includes(buttonSize)) {
-        throw new Error('Invalid buttonSize. Must be one of: sm, md, lg');
-      }
-      
-      if (!['default', 'dark', 'light'].includes(themeMode)) {
-        throw new Error('Invalid themeMode. Must be one of: default, dark, light');
-      }
-      
-      console.log('[NAV] Data validation passed, proceeding with save...');
-      
-      // Save to the correct Firebase path that matches the Rules
+      // Save directly without validation - let Firebase rules handle it
       await set(ref(db, 'navigation_settings'), styleData);
       console.log('[NAV] Successfully saved to navigation_settings');
 
-      // Verify the save worked by reading it back
-      const verifySnapshot = await get(ref(db, 'navigation_settings'));
-      if (verifySnapshot.exists()) {
-        console.log('[NAV] Verification SUCCESS: Data was saved and can be read back:', verifySnapshot.val());
-        alert('Navigation settings saved successfully! Remember to click "Publish to Live" to update the live site.');
-      } else {
-        console.log('[NAV] Verification FAILED: Data was not saved or cannot be read back');
-        alert('Navigation settings saved, but verification failed. Please check browser console.');
-      }
+      alert('Navigation settings saved successfully! Remember to click "Publish to Live" to update the live site.');
       
       // Reload to verify persistence
       setTimeout(() => {
@@ -223,18 +193,7 @@ export default function NavigationCustomizer() {
     } catch (error) {
       console.error('[NAV] Error saving navigation:', error);
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      console.error('[NAV] Current user:', user);
-      console.error('[NAV] Error details:', error);
-      
-      if (errorMsg.includes('Permission denied') || errorMsg.includes('PERMISSION_DENIED')) {
-        const debugMsg = user ? `User ${user.uid} doesn't have write permission to navigation_settings` : 'User is not authenticated';
-        console.error('[NAV] Permission error details:', debugMsg);
-        alert(`Failed to save: Firebase permissions issue.\n\n${debugMsg}\n\nMake sure you are signed in with the correct admin account.`);
-      } else if (errorMsg.includes('Network')) {
-        alert('Network error: Please check your connection and try again.');
-      } else {
-        alert('Failed to save navigation settings.\n\nError: ' + errorMsg + '\n\nPlease check the browser console for more details.');
-      }
+      alert('Failed to save navigation settings.\n\nError: ' + errorMsg);
     } finally {
       setSaving(false);
     }
