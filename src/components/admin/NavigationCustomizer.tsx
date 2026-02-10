@@ -176,10 +176,31 @@ export default function NavigationCustomizer() {
         buttonSize: buttonSize,
         themeMode: themeMode,
         buttonLabels: buttonLabels,
-        savedAt: new Date().toISOString()
+        updated_at: new Date().toISOString()
       };
 
       console.log('[NAV] Saving to navigation_settings:', styleData);
+      
+      // Validate data matches Firebase rules requirements
+      const hexColorRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+      if (!hexColorRegex.test(navBgColor) || !hexColorRegex.test(navTextColor) || 
+          !hexColorRegex.test(activeTabColor) || !hexColorRegex.test(inactiveButtonColor)) {
+        throw new Error('Invalid color format. All colors must be valid hex colors (e.g., #ffffff)');
+      }
+      
+      if (!['full', 'lg', 'md', 'sm'].includes(borderRadius)) {
+        throw new Error('Invalid borderRadius. Must be one of: full, lg, md, sm');
+      }
+      
+      if (!['sm', 'md', 'lg'].includes(buttonSize)) {
+        throw new Error('Invalid buttonSize. Must be one of: sm, md, lg');
+      }
+      
+      if (!['default', 'dark', 'light'].includes(themeMode)) {
+        throw new Error('Invalid themeMode. Must be one of: default, dark, light');
+      }
+      
+      console.log('[NAV] Data validation passed, proceeding with save...');
       
       // Save to the correct Firebase path that matches the Rules
       await set(ref(db, 'navigation_settings'), styleData);
