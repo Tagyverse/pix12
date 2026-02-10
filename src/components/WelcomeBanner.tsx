@@ -65,17 +65,43 @@ export default function WelcomeBanner() {
     console.log('[WELCOME-BANNER] Using default social links');
   }
 
+  const defaultSocialSettings = {
+    bg_color: '#f5f5f5',
+    text_color: '#000000'
+  };
+
+  const socialSectionSettings = publishedData?.social_links_settings?.value || defaultSocialSettings;
+
+  if (publishedData?.social_links_settings?.value) {
+    console.log('[WELCOME-BANNER] Using published social settings');
+  }
+
+  const bannerBgColor = bannerContent.bg_color || '#14b8a6';
+  const bannerTextColor = bannerContent.text_color || '#ffffff';
+  const socialBgColor = socialSectionSettings.bg_color || '#f5f5f5';
+  const socialTextColor = socialSectionSettings.text_color || '#000000';
+
   if (!bannerContent.isVisible) {
     return null;
   }
 
   return (
-    <div className="bg-gradient-to-r from-teal-500 to-mint-500 text-white py-6 px-4 text-center">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-2xl md:text-3xl font-bold mb-2">{bannerContent.title}</h2>
-        <p className="text-sm md:text-base mb-4">{bannerContent.subtitle}</p>
-        
-        <div className="flex justify-center items-center gap-4 mt-4">
+    <div>
+      <div
+        className="py-6 px-4 text-center"
+        style={{ backgroundColor: bannerBgColor, color: bannerTextColor }}
+      >
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: bannerTextColor }}>{bannerContent.title}</h2>
+          <p className="text-sm md:text-base mb-4" style={{ color: bannerTextColor, opacity: 0.85 }}>{bannerContent.subtitle}</p>
+        </div>
+      </div>
+      
+      <div
+        className="py-4 px-4"
+        style={{ backgroundColor: socialBgColor }}
+      >
+        <div className="flex justify-center items-center gap-4">
           {socialLinks.map((social) => {
             const IconComponent = PLATFORM_ICONS[social.platform as keyof typeof PLATFORM_ICONS] || LinkIcon;
             return (
@@ -84,10 +110,11 @@ export default function WelcomeBanner() {
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-white/20 hover:bg-white/30 p-3 rounded-full transition-all transform hover:scale-110"
+                className="p-3 rounded-full transition-all transform hover:scale-110"
+                style={{ backgroundColor: `${socialTextColor}15` }}
                 aria-label={social.platform}
               >
-                <IconComponent className="w-5 h-5" />
+                <IconComponent className="w-5 h-5" style={{ color: socialTextColor }} />
               </a>
             );
           })}

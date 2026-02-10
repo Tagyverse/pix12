@@ -35,6 +35,7 @@ interface PublishData {
   settings: any | null;
   bill_settings: any | null;
   social_links: Record<string, any> | null;
+  social_links_settings: any | null;
   site_content: Record<string, any> | null;
   admins: Record<string, any> | null;
   super_admins: Record<string, any> | null;
@@ -102,6 +103,7 @@ export default function PublishManager({ onPublishComplete }: { onPublishComplet
       settings: ref(db, 'settings'),
       bill_settings: ref(db, 'bill_settings'),
       social_links: ref(db, 'social_links'),
+      social_links_settings: ref(db, 'social_links_settings'),
       site_content: ref(db, 'site_content'),
       admins: ref(db, 'admins'),
       super_admins: ref(db, 'super_admins'),

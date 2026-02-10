@@ -81,6 +81,15 @@ export default function BannerSocialManager() {
         setSmartFeatureFABVisible(data.smart_feature_fab !== undefined ? data.smart_feature_fab : false);
       }
 
+      const socialSettingsRef = ref(db, 'social_links_settings');
+      const socialSettingsSnapshot = await get(socialSettingsRef);
+      if (socialSettingsSnapshot.exists()) {
+        const data = socialSettingsSnapshot.val();
+        if (data.value) {
+          setSocialSettings(data.value);
+        }
+      }
+
       const socialRef = ref(db, 'social_links');
       const socialSnapshot = await get(socialRef);
       if (socialSnapshot.exists()) {
@@ -247,6 +256,23 @@ export default function BannerSocialManager() {
     }
   };
 
+  const saveSocialSettings = async () => {
+    try {
+      setSaving(true);
+      const socialRef = ref(db, 'social_links_settings');
+      await set(socialRef, {
+        value: socialSettings,
+        updated_at: new Date().toISOString()
+      });
+      alert('Social settings saved successfully!');
+    } catch (error) {
+      console.error('Error saving social settings:', error);
+      alert('Failed to save social settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -309,10 +335,58 @@ export default function BannerSocialManager() {
             />
           </div>
 
-          <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-teal-50 border-2 border-teal-100 rounded-lg p-4">
-            <p className="text-sm font-bold text-gray-700 mb-2">Preview:</p>
-            <p className="text-sm text-gray-600 font-medium">
-              {bannerData.title} - {bannerData.subtitle}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Background Color
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={bannerData.bg_color}
+                  onChange={(e) => setBannerData({ ...bannerData, bg_color: e.target.value })}
+                  className="w-12 h-10 rounded-lg border-2 border-gray-300 cursor-pointer p-0.5"
+                />
+                <input
+                  type="text"
+                  value={bannerData.bg_color}
+                  onChange={(e) => setBannerData({ ...bannerData, bg_color: e.target.value })}
+                  className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none font-mono text-sm"
+                  placeholder="#ffffff"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Text Color
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={bannerData.text_color}
+                  onChange={(e) => setBannerData({ ...bannerData, text_color: e.target.value })}
+                  className="w-12 h-10 rounded-lg border-2 border-gray-300 cursor-pointer p-0.5"
+                />
+                <input
+                  type="text"
+                  value={bannerData.text_color}
+                  onChange={(e) => setBannerData({ ...bannerData, text_color: e.target.value })}
+                  className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none font-mono text-sm"
+                  placeholder="#000000"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="rounded-lg p-4 border-2 border-teal-100"
+            style={{ backgroundColor: bannerData.bg_color, color: bannerData.text_color }}
+          >
+            <p className="text-sm font-bold mb-1" style={{ color: bannerData.text_color, opacity: 0.6 }}>Preview:</p>
+            <h3 className="text-lg font-bold" style={{ color: bannerData.text_color }}>{bannerData.title}</h3>
+            <p className="text-sm font-medium" style={{ color: bannerData.text_color, opacity: 0.85 }}>
+              {bannerData.subtitle}
             </p>
           </div>
 
@@ -390,7 +464,7 @@ export default function BannerSocialManager() {
             <div className="bg-white rounded-lg p-4 border-2 border-pink-200">
               <h4 className="font-bold text-pink-600 mb-2 flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.435 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
                 </svg>
                 Match Your Dress
               </h4>
@@ -450,6 +524,84 @@ export default function BannerSocialManager() {
             </button>
           </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Section Background Color
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={socialSettings.bg_color}
+                onChange={(e) => setSocialSettings({ ...socialSettings, bg_color: e.target.value })}
+                className="w-12 h-10 rounded-lg border-2 border-gray-300 cursor-pointer p-0.5"
+              />
+              <input
+                type="text"
+                value={socialSettings.bg_color}
+                onChange={(e) => setSocialSettings({ ...socialSettings, bg_color: e.target.value })}
+                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none font-mono text-sm"
+                placeholder="#f5f5f5"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Icon / Text Color
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={socialSettings.text_color}
+                onChange={(e) => setSocialSettings({ ...socialSettings, text_color: e.target.value })}
+                className="w-12 h-10 rounded-lg border-2 border-gray-300 cursor-pointer p-0.5"
+              />
+              <input
+                type="text"
+                value={socialSettings.text_color}
+                onChange={(e) => setSocialSettings({ ...socialSettings, text_color: e.target.value })}
+                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none font-mono text-sm"
+                placeholder="#000000"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="rounded-lg p-4 border-2 border-blue-100 mb-6 flex items-center justify-center gap-4"
+          style={{ backgroundColor: socialSettings.bg_color }}
+        >
+          <p className="text-sm font-bold mr-2" style={{ color: socialSettings.text_color, opacity: 0.6 }}>Preview:</p>
+          {[Instagram, Facebook, Twitter].map((PlatformIcon, i) => (
+            <div
+              key={i}
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: `${socialSettings.text_color}20` }}
+            >
+              <PlatformIcon className="w-5 h-5" style={{ color: socialSettings.text_color }} />
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={saveSocialSettings}
+          disabled={saving}
+          className="flex items-center gap-2 bg-blue-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed mb-6"
+        >
+          {saving ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-5 h-5" />
+              Save Social Settings
+            </>
+          )}
+        </button>
 
         {showAddLink && (
           <div className="bg-blue-50 rounded-lg p-4 mb-6 border-2 border-blue-200">

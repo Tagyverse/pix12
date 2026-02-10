@@ -31,6 +31,7 @@ interface PublishedData {
   bill_settings: any | null;
   // Banner and social
   social_links: Record<string, any> | null;
+  social_links_settings: any | null;
   site_content: Record<string, any> | null;
   published_at?: string;
   version?: string;
@@ -73,6 +74,7 @@ async function getDataFromFirebase(): Promise<PublishedData | null> {
       bill_settings: ref(db, 'bill_settings'),
       // Banner and social data
       social_links: ref(db, 'social_links'),
+      social_links_settings: ref(db, 'social_links_settings'),
       site_content: ref(db, 'site_content'),
     };
 
